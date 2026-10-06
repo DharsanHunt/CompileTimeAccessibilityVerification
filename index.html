@@ -617,17 +617,40 @@
             <option value="blank">Template 7: Blank Scratchpad</option>
           </select>
 
-          <!-- Run Compiler Button -->
-          <button onclick="compileCustomEditorCode()" id="btnCustomCompile" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm active:scale-95">
-            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            <span>Compile & Run (Ctrl+Enter)</span>
-          </button>
+          <!-- Run Compiler & Auto-Repair Action Cluster -->
+          <div class="flex flex-col items-stretch gap-1.5">
+            <button onclick="compileCustomEditorCode()" id="btnCustomCompile" class="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm active:scale-95">
+              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <span>Compile & Run (Ctrl+Enter)</span>
+            </button>
+
+            <!-- Separate Auto-Repair Button (Appears below Compile & Run if code gives error) -->
+            <button onclick="autoRepairEditorCode()" id="btnAutoRepairCode" class="hidden flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold transition shadow-md active:scale-95 animate-pulse" title="Automatically fix accessibility violations & compile working code">
+              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M7.5 5.6L5 7l1.4-2.5L5 2l2.5 1.4L10 2 8.6 4.5 10 7 7.5 5.6zm12 9.8L22 14l-1.4 2.5L22 19l-2.5-1.4L17 19l1.4-2.5L17 14l2.5 1.4zM22 2l-2.5 1.4L17 2l1.4 2.5L17 7l2.5-1.4L22 7l-1.4-2.5L22 2zm-7.63 5.29c-.39-.39-1.02-.39-1.41 0L1.29 18.96c-.39.39-.39 1.02 0 1.41l2.34 2.34c.39.39 1.02.39 1.41 0L16.7 11.05c.39-.39.39-1.02 0-1.41l-2.33-2.35zm-1.03 5.49l-2.12-2.12 2.44-2.44 2.12 2.12-2.44 2.44z"/></svg>
+              <span>⚡ Auto-Repair Code & Fix</span>
+            </button>
+          </div>
 
           <!-- Export HTML Button -->
           <button onclick="exportCompiledHtml()" id="btnExportHtml" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition" title="Export accessible HTML file">
             <span>💾 Save HTML</span>
           </button>
         </div>
+      </div>
+
+      <!-- Auto-Repair Alert Banner (Appears below Compile & Run when errors/violations exist) -->
+      <div id="compilerRepairBanner" class="hidden p-3.5 bg-amber-50 border border-amber-200/90 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div class="flex items-center gap-2.5 text-xs text-amber-900">
+          <span class="text-base p-1.5 rounded-lg bg-amber-100 text-amber-700">🔧</span>
+          <div>
+            <span class="font-bold">Errors Detected in DSL Code.</span>
+            <span class="text-slate-600 ml-1">A11yCC can automatically repair tab order, missing labels, and focus traps to make the code compile and work.</span>
+          </div>
+        </div>
+        <button onclick="autoRepairEditorCode()" class="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition shadow-sm active:scale-95 shrink-0">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M7.5 5.6L5 7l1.4-2.5L5 2l2.5 1.4L10 2 8.6 4.5 10 7 7.5 5.6zm12 9.8L22 14l-1.4 2.5L22 19l-2.5-1.4L17 19l1.4-2.5L17 14l2.5 1.4zM22 2l-2.5 1.4L17 2l1.4 2.5L17 7l2.5-1.4L22 7l-1.4-2.5L22 2zm-7.63 5.29c-.39-.39-1.02-.39-1.41 0L1.29 18.96c-.39.39-.39 1.02 0 1.41l2.34 2.34c.39.39 1.02.39 1.41 0L16.7 11.05c.39-.39.39-1.02 0-1.41l-2.33-2.35zm-1.03 5.49l-2.12-2.12 2.44-2.44 2.12 2.12-2.44 2.44z"/></svg>
+          <span>⚡ Auto-Repair (Make Code Work)</span>
+        </button>
       </div>
 
       <!-- Editor & Output Grid -->
@@ -1807,6 +1830,217 @@ Container(id="my-app", x=0, y=0) {
     }
 
     // ==========================================
+    // A11yCC CONSTRAINT-BASED AUTO-REPAIR ENGINE
+    // ==========================================
+    class A11yAutoRepair {
+      static escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      static getElementArgsRange(source, elemId) {
+        const idRegex = new RegExp('id\\s*=\\s*"' + A11yAutoRepair.escapeRegExp(elemId) + '"');
+        const m = idRegex.exec(source);
+        if (!m) return null;
+        const idStart = m.index;
+
+        const openParen = source.lastIndexOf('(', idStart);
+        if (openParen === -1) return null;
+
+        let depth = 1;
+        let inQuote = false;
+        let quoteChar = '';
+        let closeParen = -1;
+        for (let i = openParen + 1; i < source.length; i++) {
+          const ch = source[i];
+          if (inQuote) {
+            if (ch === quoteChar && source[i - 1] !== '\\') {
+              inQuote = false;
+            }
+          } else {
+            if (ch === '"' || ch === "'") {
+              inQuote = true;
+              quoteChar = ch;
+            } else if (ch === '(') {
+              depth++;
+            } else if (ch === ')') {
+              depth--;
+              if (depth === 0) {
+                closeParen = i;
+                break;
+              }
+            }
+          }
+        }
+        if (closeParen === -1) return null;
+        return { openParen, closeParen };
+      }
+
+      static updateElementAttribute(source, elemId, attrName, attrValue, isString = true) {
+        const range = A11yAutoRepair.getElementArgsRange(source, elemId);
+        if (!range) return source;
+
+        let args = source.substring(range.openParen + 1, range.closeParen);
+        const attrRegex = new RegExp('\\b' + attrName + '\\s*=\\s*("[^"]*"|\\d+|true|false)');
+
+        const formattedVal = isString ? `"${attrValue}"` : attrValue;
+        if (attrRegex.test(args)) {
+          args = args.replace(attrRegex, `${attrName}=${formattedVal}`);
+        } else {
+          args = args.trimEnd();
+          if (args.length > 0 && !args.endsWith(',')) {
+            args += `, ${attrName}=${formattedVal}`;
+          } else {
+            args += `${attrName}=${formattedVal}`;
+          }
+        }
+
+        return source.substring(0, range.openParen + 1) + args + source.substring(range.closeParen);
+      }
+
+      static repair(source) {
+        if (!source || !source.trim()) return { code: source, logs: [], success: true };
+        let repaired = source;
+        const changeLogs = [];
+
+        // Step 0: Syntax Healing (semicolons, braces)
+        const openBraces = (repaired.match(/\{/g) || []).length;
+        const closeBraces = (repaired.match(/\}/g) || []).length;
+        if (openBraces > closeBraces) {
+          repaired += '\n' + '}'.repeat(openBraces - closeBraces);
+          changeLogs.push(`Closed ${openBraces - closeBraces} unclosed braces.`);
+        }
+
+        let ast = null;
+        try {
+          ast = A11yCompiler.parse(repaired);
+        } catch (e) {
+          const fixedLines = repaired.split('\n').map(line => {
+            const trimmed = line.trim();
+            if ((trimmed.startsWith('Button(') || trimmed.startsWith('Input(') || trimmed.startsWith('Text(') || trimmed.startsWith('toggle ')) && trimmed.endsWith(')') && !trimmed.endsWith(');')) {
+              return line + ';';
+            }
+            return line;
+          });
+          repaired = fixedLines.join('\n');
+          try {
+            ast = A11yCompiler.parse(repaired);
+            changeLogs.push('Added missing semicolons to element declarations.');
+          } catch (e2) {
+            return { code: repaired, logs: changeLogs, success: false, error: e2.message };
+          }
+        }
+
+        let result = A11yCompiler.analyze(ast);
+        if (result.violations.length === 0) {
+          return { code: repaired, logs: ['Code is already 100% compliant.'], success: true };
+        }
+
+        // 1. Fix Undeclared Toggles
+        const undeclared = result.violations.filter(v => v.rule === 'UndeclaredToggle');
+        const addedToggles = new Set();
+        for (const v of undeclared) {
+          const match = v.message.match(/'([^']+)'/);
+          const varName = match ? match[1] : null;
+          if (varName && !addedToggles.has(varName)) {
+            addedToggles.add(varName);
+            repaired = `toggle ${varName} = false;\n` + repaired;
+            changeLogs.push(`Declared missing toggle '${varName}'`);
+          }
+        }
+
+        if (addedToggles.size > 0) {
+          try { ast = A11yCompiler.parse(repaired); } catch(e) {}
+        }
+
+        let analysis = A11yCompiler.analyze(ast);
+        let { allElements, elementMap } = analysis;
+
+        // 2. Fix Missing Labels (WCAG 4.1.2)
+        const missingLabels = analysis.violations.filter(v => v.rule === 'MissingLabel');
+        for (const v of missingLabels) {
+          const elemId = v.element_id;
+          if (!elemId) continue;
+          let readable = elemId
+            .replace(/[-_]/g, ' ')
+            .replace(/\b(btn|button|input|action|icon|txt|trigger)\b/gi, '')
+            .trim();
+          if (!readable) readable = 'Action';
+          readable = readable.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+          repaired = A11yAutoRepair.updateElementAttribute(repaired, elemId, 'label', readable, true);
+          changeLogs.push(`Added label="${readable}" for #${elemId}`);
+        }
+
+        // Refresh AST before checking focus order
+        try {
+          ast = A11yCompiler.parse(repaired);
+          analysis = A11yCompiler.analyze(ast);
+          allElements = analysis.allElements;
+          elementMap = analysis.elementMap;
+        } catch(e) {}
+
+        // 3. Fix Focus Order Mismatch (WCAG 2.4.3 / Topological Sort)
+        const interactiveElems = allElements.filter(e => e.isInteractive);
+        if (interactiveElems.length > 1) {
+          const sortedVisual = [...interactiveElems].sort((a, b) => {
+            if (a.y !== b.y) return a.y - b.y;
+            if (a.x !== b.x) return a.x - b.x;
+            return a.id.localeCompare(b.id);
+          });
+
+          for (let i = 0; i < sortedVisual.length; i++) {
+            const elem = sortedVisual[i];
+            const targetTabIndex = i + 1;
+            repaired = A11yAutoRepair.updateElementAttribute(repaired, elem.id, 'tabindex', targetTabIndex, false);
+          }
+          changeLogs.push('Re-sequenced tabindex order via topological sort');
+        }
+
+        // Refresh AST before checking focus traps
+        try {
+          ast = A11yCompiler.parse(repaired);
+          analysis = A11yCompiler.analyze(ast);
+          allElements = analysis.allElements;
+          elementMap = analysis.elementMap;
+        } catch(e) {}
+
+        // 4. Fix Focus Traps (WCAG 2.1.2 & 2.4.3)
+        const focusTraps = analysis.violations.filter(v => v.rule === 'PotentialFocusTrap' || v.rule === 'InvalidFocusFallback');
+        if (focusTraps.length > 0) {
+          let fallbackTarget = allElements.find(e => e.isInteractive && !e.show_when && (!e.parentId || !elementMap.get(e.parentId).show_when));
+          if (!fallbackTarget) fallbackTarget = allElements.find(e => e.isInteractive);
+          if (!fallbackTarget && allElements.length > 0) fallbackTarget = allElements[0];
+
+          if (fallbackTarget) {
+            const processed = new Set();
+            for (const trap of focusTraps) {
+              const elemId = trap.element_id;
+              if (processed.has(elemId)) continue;
+              processed.add(elemId);
+
+              repaired = A11yAutoRepair.updateElementAttribute(repaired, elemId, 'focus_fallback', fallbackTarget.id, true);
+              changeLogs.push(`Set focus_fallback="${fallbackTarget.id}" on #${elemId}`);
+            }
+          }
+        }
+
+        // Final verification
+        try {
+          const finalAst = A11yCompiler.parse(repaired);
+          const finalRes = A11yCompiler.analyze(finalAst);
+          return {
+            code: repaired,
+            logs: changeLogs,
+            success: finalRes.violations.length === 0,
+            violations: finalRes.violations
+          };
+        } catch(e) {
+          return { code: repaired, logs: changeLogs, success: false, error: e.message };
+        }
+      }
+    }
+
+    // ==========================================
     // STUDIO STATE & COMPILATION CONTROLLERS
     // ==========================================
     let latestCustomAst = null;
@@ -1850,11 +2084,45 @@ Container(id="my-app", x=0, y=0) {
       reader.readAsText(file);
     }
 
+    function autoRepairEditorCode() {
+      const editor = document.getElementById('dslCustomEditor');
+      if (!editor) return;
+
+      const btnRepair = document.getElementById('btnAutoRepairCode');
+      const originalText = btnRepair ? btnRepair.innerHTML : '';
+      if (btnRepair) btnRepair.innerHTML = `<span class="animate-spin">⏳</span> Repairing...`;
+
+      setTimeout(() => {
+        const originalCode = editor.value;
+        const res = A11yAutoRepair.repair(originalCode);
+
+        if (res.success || (res.code && res.code !== originalCode)) {
+          editor.value = res.code;
+          updateLineCount();
+
+          // Flash ring on editor to indicate successful update
+          editor.classList.add('ring-4', 'ring-amber-400');
+          setTimeout(() => editor.classList.remove('ring-4', 'ring-amber-400'), 1500);
+
+          // Save logs for display in compiler output
+          window._lastRepairLogs = res.logs || [];
+
+          // Immediately re-compile and run the repaired code
+          compileCustomEditorCode();
+        } else {
+          alert('Could not auto-repair code: ' + (res.error || 'Syntax errors prevent automated repair.'));
+          if (btnRepair) btnRepair.innerHTML = originalText;
+        }
+      }, 150);
+    }
+
     function compileCustomEditorCode() {
       const editor = document.getElementById('dslCustomEditor');
       const consoleOut = document.getElementById('compilerConsoleOut');
       const statusPill = document.getElementById('compilerStatusPill');
       const btn = document.getElementById('btnCustomCompile');
+      const btnRepair = document.getElementById('btnAutoRepairCode');
+      const bannerRepair = document.getElementById('compilerRepairBanner');
 
       const originalBtnText = btn.innerHTML;
       btn.innerHTML = `<span class="animate-spin">⏳</span> Compiling...`;
@@ -1870,7 +2138,10 @@ Container(id="my-app", x=0, y=0) {
           const result = A11yCompiler.analyze(ast);
 
           if (result.violations.length > 0) {
-            // Defect found
+            // Defect found: show separate repair button below compile & run, and banner
+            if (btnRepair) btnRepair.classList.remove('hidden');
+            if (bannerRepair) bannerRepair.classList.remove('hidden');
+
             statusPill.className = 'font-mono-code text-[11px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold border border-rose-200';
             statusPill.innerText = `⚠️ ${result.violations.length} Violation(s)`;
 
@@ -1881,6 +2152,16 @@ Container(id="my-app", x=0, y=0) {
                     <span>❌</span> A11yCC Verification Failed: ${result.violations.length} defect(s) detected.
                   </span>
                   <span class="text-[10px] bg-rose-900 px-2 py-0.5 rounded text-rose-300">Explored ${result.statesCount} states</span>
+                </div>
+
+                <!-- 1-Click Auto-Repair Console Action -->
+                <div class="p-3 bg-amber-500/10 border border-amber-500/40 rounded-xl flex items-center justify-between gap-3 text-xs">
+                  <div class="text-amber-300">
+                    <span class="font-bold text-amber-200">⚡ 1-Click Auto-Repair:</span> Automatically fix tab order, labels, and focus traps to make code work.
+                  </div>
+                  <button onclick="autoRepairEditorCode()" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg text-xs transition shadow-sm flex items-center gap-1 shrink-0 cursor-pointer active:scale-95">
+                    <span>⚡ Repair Code & Run</span>
+                  </button>
                 </div>
             `;
 
@@ -1915,7 +2196,10 @@ Container(id="my-app", x=0, y=0) {
             consoleOut.innerHTML = html;
 
           } else {
-            // Clean program (0 violations)
+            // Clean program (0 violations): hide repair buttons
+            if (btnRepair) btnRepair.classList.add('hidden');
+            if (bannerRepair) bannerRepair.classList.add('hidden');
+
             statusPill.className = 'font-mono-code text-[11px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold border border-emerald-200';
             statusPill.innerText = `✓ Verified (0 Errors)`;
 
@@ -1927,8 +2211,20 @@ Container(id="my-app", x=0, y=0) {
             }
             customFocusedId = null;
 
+            const repairSuccessHtml = (window._lastRepairLogs && window._lastRepairLogs.length > 0) ? `
+              <div class="p-3 bg-amber-500/20 border border-amber-400/50 rounded-xl text-amber-200 text-xs flex items-center gap-2.5">
+                <span class="text-base">✨</span>
+                <div>
+                  <span class="font-bold text-white">Auto-Repair Successfully Applied:</span>
+                  <span class="ml-1">${window._lastRepairLogs.join(' • ')}</span>
+                </div>
+              </div>
+            ` : '';
+            window._lastRepairLogs = null;
+
             consoleOut.innerHTML = `
               <div class="p-4 bg-emerald-950/80 border border-emerald-600/80 rounded-xl space-y-3">
+                ${repairSuccessHtml}
                 <div class="flex items-center justify-between border-b border-emerald-800/60 pb-2">
                   <div class="flex items-center gap-2">
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white uppercase">VERIFIED</span>
@@ -1976,6 +2272,10 @@ Container(id="my-app", x=0, y=0) {
             renderWebUI('custom');
           }
         } catch (err) {
+          // Parse/Syntax error: show repair button and banner
+          if (btnRepair) btnRepair.classList.remove('hidden');
+          if (bannerRepair) bannerRepair.classList.remove('hidden');
+
           statusPill.className = 'font-mono-code text-[11px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold border border-rose-200';
           statusPill.innerText = '❌ Parse Error';
 
@@ -1988,8 +2288,11 @@ Container(id="my-app", x=0, y=0) {
                 <span class="text-[10px] bg-rose-900 px-2 py-0.5 rounded text-rose-300 font-mono-code">Line ${err.line || 1}:${err.col || 1}</span>
               </div>
               <p class="text-xs text-rose-300">${err.message || String(err)}</p>
-              <div class="p-2 bg-rose-900/50 rounded-lg text-[11px] text-amber-200 border border-rose-700/50">
-                💡 Check for matching braces, quotes, commas, and valid keyword spelling.
+              <div class="p-2.5 bg-amber-500/10 border border-amber-500/40 rounded-lg text-amber-200 text-xs flex items-center justify-between gap-2">
+                <div><span>💡</span> <span class="font-semibold text-white">Syntax Auto-Fix:</span> Attempt automatic semicolon and delimiter healing.</div>
+                <button onclick="autoRepairEditorCode()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded text-[11px] transition shrink-0 cursor-pointer">
+                  ⚡ Auto-Fix
+                </button>
               </div>
             </div>
           `;
