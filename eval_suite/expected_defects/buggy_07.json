@@ -1,0 +1,14 @@
+[
+  {
+    "rule": "MissingLabel",
+    "wcag": "4.1.2",
+    "element_id": "btn-confirm",
+    "severity": "error"
+  },
+  {
+    "rule": "MissingLabel",
+    "wcag": "4.1.2",
+    "element_id": "btn-dismiss",
+    "severity": "error"
+  }
+]

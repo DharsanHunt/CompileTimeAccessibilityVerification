@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A11yCC Accessible UI</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .kf-stage {
+      position: relative;
+      min-height: 600px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .kf-element {
+      position: absolute;
+    }
+    .kf-button {
+      padding: 8px 16px;
+      background-color: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+    .kf-button:hover {
+      background-color: #1d4ed8;
+    }
+    .kf-input {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .kf-text {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .kf-group {
+      border: 1px dashed #94a3b8;
+      border-radius: 6px;
+      padding: 12px;
+    }
+    :focus-visible {
+      outline: 3px solid #f59e0b !important;
+      outline-offset: 2px !important;
+    }
+    .kf-toggle-panel {
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: #f1f5f9;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .kf-toggle-label {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #475569;
+    }
+    .kf-toggle-btn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid #94a3b8;
+      background: #ffffff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .kf-toggle-btn[aria-pressed="true"] {
+      background: #0284c7;
+      color: white;
+      border-color: #0284c7;
+    }
+    [hidden] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="kf-toggle-panel" role="toolbar" aria-label="State Space Simulator">
+  <span class="kf-toggle-label">Interactive Toggles:</span>
+  <button type="button" class="kf-toggle-btn" data-toggle-name="toolsExpanded" aria-pressed="false" onclick="toggleState('toolsExpanded')">Toggle: toolsExpanded (<b>toolsExpanded</b>: <span id="val-toolsExpanded">False</span>)</button>
+</div>
+  <main class="kf-stage" role="main">
+    <section id="toolbar-root" class="kf-container" style="left: 0.0px; top: 0.0px;" role="region">
+      <button type="button" id="btn-edit" class="kf-element kf-button" style="left: 0.0px; top: 0.0px;" tabindex="1" aria-label="Edit document">Edit document</button>
+      <button type="button" id="btn-save" class="kf-element kf-button" style="left: 100.0px; top: 0.0px;" tabindex="2" aria-label="Save document">Save document</button>
+      <button type="button" id="btn-more" class="kf-element kf-button" style="left: 200.0px; top: 0.0px;" tabindex="3" aria-label="More tools">More tools</button>
+      <div id="extra-tools" class="kf-element kf-group" style="left: 0.0px; top: 50.0px;" role="group" data-show-when="toolsExpanded" hidden>
+        <button type="button" id="btn-export" class="kf-element kf-button" style="left: 0.0px; top: 50.0px;" tabindex="4" aria-label="Export as PDF" data-focus-fallback="btn-more">Export as PDF</button>
+        <button type="button" id="btn-print" class="kf-element kf-button" style="left: 100.0px; top: 50.0px;" tabindex="5" aria-label="Print document" data-focus-fallback="btn-more">Print document</button>
+      </div>
+    </section>
+  </main>
+  <script>
+  const state = {'toolsExpanded': False};
+
+  function evaluateExpr(expr, env) {
+    if (!expr) return true;
+    // Replace variable names with boolean values
+    let jsExpr = expr
+      .replace(/&&/g, ' && ')
+      .replace(/\|\|/g, ' || ')
+      .replace(/!/g, ' ! ');
+    for (const [k, v] of Object.entries(env)) {
+      const regex = new RegExp('\\b' + k + '\\b', 'g');
+      jsExpr = jsExpr.replace(regex, v ? 'true' : 'false');
+    }
+    try {
+      return Boolean(Function('"use strict"; return (' + jsExpr + ')')());
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function toggleState(name) {
+    state[name] = !state[name];
+    const valSpan = document.getElementById('val-' + name);
+    if (valSpan) valSpan.textContent = state[name];
+
+    const btn = document.querySelector(`[data-toggle-name="${name}"]`);
+    if (btn) btn.setAttribute('aria-pressed', state[name] ? 'true' : 'false');
+
+    // Update visibility of elements
+    const elementsWithCondition = document.querySelectorAll('[data-show-when]');
+    elementsWithCondition.forEach(el => {
+      const expr = el.getAttribute('data-show-when');
+      const shouldShow = evaluateExpr(expr, state);
+      
+      if (!shouldShow && !el.hasAttribute('hidden')) {
+        // Element is vanishing: check focus fallback
+        if (document.activeElement === el) {
+          const fallbackId = el.getAttribute('data-focus-fallback');
+          if (fallbackId) {
+            const fallbackEl = document.getElementById(fallbackId);
+            if (fallbackEl && !fallbackEl.hasAttribute('hidden')) {
+              fallbackEl.focus();
+            }
+          }
+        }
+        el.setAttribute('hidden', '');
+      } else if (shouldShow && el.hasAttribute('hidden')) {
+        el.removeAttribute('hidden');
+      }
+    });
+  }
+</script>
+</body>
+</html>

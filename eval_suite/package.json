@@ -1,0 +1,13 @@
+{
+  "name": "kanaforge-eval-axe",
+  "version": "1.0.0",
+  "description": "Axe-core baseline comparison runner for Kana-Forge",
+  "private": true,
+  "scripts": {
+    "audit": "node axe_runner.js"
+  },
+  "dependencies": {
+    "axe-core": "^4.10.2",
+    "jsdom": "^26.0.0"
+  }
+}

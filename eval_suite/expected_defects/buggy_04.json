@@ -1,0 +1,8 @@
+[
+  {
+    "rule": "FocusOrderMismatch",
+    "wcag": "2.4.3",
+    "element_id": "btn-second",
+    "severity": "error"
+  }
+]

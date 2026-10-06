@@ -1,0 +1,8 @@
+[
+  {
+    "rule": "PotentialFocusTrap",
+    "wcag": "2.4.3, 2.1.2",
+    "element_id": "modal-close-action",
+    "severity": "error"
+  }
+]
