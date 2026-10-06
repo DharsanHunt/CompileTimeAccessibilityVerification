@@ -53,16 +53,16 @@
       </div>
 
       <!-- Center Navigation Pills -->
-      <nav class="hidden xl:flex items-center gap-1 text-xs font-medium text-slate-600">
-        <button onclick="switchView('overview')" class="px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-900 font-semibold">Overview</button>
+      <nav id="topNavPills" class="hidden xl:flex items-center gap-1 text-xs font-medium text-slate-600">
+        <button id="nav-overview" onclick="switchView('overview')" class="px-3 py-1.5 rounded-md bg-slate-900 text-white font-semibold shadow-sm transition">Overview</button>
         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 font-semibold border border-purple-200/60">
           <span class="text-[10px]">⚡</span> Compiler Engine
         </span>
-        <button onclick="switchView('pipeline')" class="px-3 py-1.5 rounded-md hover:bg-slate-100">Parser & AST</button>
-        <button onclick="switchView('hypercube')" class="px-3 py-1.5 rounded-md hover:bg-slate-100">2^k Hypercube</button>
-        <button onclick="switchView('autorepair')" class="px-3 py-1.5 rounded-md hover:bg-slate-100">Auto-Repair Diff</button>
-        <button onclick="switchView('benchmark')" class="px-3 py-1.5 rounded-md hover:bg-slate-100">Axe-Core Gap</button>
-        <button onclick="startVivaDemo()" class="px-3 py-1.5 rounded-md hover:bg-emerald-50 text-emerald-700 font-semibold">Viva Demo</button>
+        <button id="nav-pipeline" onclick="switchView('pipeline')" class="px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition">Parser & AST</button>
+        <button id="nav-hypercube" onclick="switchView('hypercube')" class="px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition">2^k Hypercube</button>
+        <button id="nav-autorepair" onclick="switchView('autorepair')" class="px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition">Auto-Repair Diff</button>
+        <button id="nav-benchmark" onclick="switchView('benchmark')" class="px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition">Axe-Core Gap</button>
+        <button onclick="startVivaDemo()" class="px-3 py-1.5 rounded-md hover:bg-emerald-50 text-emerald-700 font-semibold transition">Viva Demo</button>
       </nav>
 
       <!-- Right Action CTA -->
@@ -221,7 +221,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
       <!-- Left Column: Comparison Benchmark Chart (7 cols) -->
-      <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-sm space-y-4">
+      <div id="benchmarkCard" class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-sm space-y-4 transition-all duration-500">
         
         <div class="flex items-center justify-between">
           <div>
@@ -341,7 +341,7 @@
       </div>
 
       <!-- Right Column: Active Program & State Trace (5 cols) -->
-      <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col justify-between space-y-4">
+      <div id="activeTraceCard" class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col justify-between space-y-4 transition-all duration-500">
         
         <div class="space-y-4">
           <div class="flex items-center justify-between">
@@ -391,9 +391,9 @@
               <span class="text-slate-500">Fix / Remediation:</span>
               <span class="font-medium text-emerald-700" id="remediationVal">Add focus_fallback="open-modal-trigger"</span>
             </div>
-            <div class="flex justify-between py-1.5">
+            <div class="flex justify-between items-center py-1.5">
               <span class="text-slate-500">Auto-Repair Status:</span>
-              <span class="font-semibold text-emerald-600" id="repairStatusVal">Diff Ready via Topo-Sort</span>
+              <button onclick="switchView('autorepair')" class="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer" id="repairStatusVal" title="Click to view and apply topological auto-repair diff">Diff Ready via Topo-Sort &rarr;</button>
             </div>
           </div>
         </div>
@@ -441,6 +441,140 @@
           <p class="text-slate-300">
             "We built a 20-program benchmark. A11yCC achieved 100% precision with 0 false positives on clean code, and 100% recall. On transition traps, Axe-Core caught 0% because of its single-render blindspot, while our compiler caught 100% in under 1 millisecond."
           </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4b. 2^k Hypercube State-Space Model Checking Inspector Modal (collapsible) -->
+    <div id="hypercubeModal" class="hidden bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-700 transition-all">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400">Formal Verification Engine</span>
+          <h2 class="text-xl font-bold mt-1 text-white">2<sup>k</sup> Bounded Model Checking Hypercube Inspector (Q<sub>k</sub>)</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Exhaustive state space enumeration and 1-toggle transition edge analysis across all reachable configurations.</p>
+        </div>
+        <button onclick="closeHypercubeModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition text-sm">✕ Close</button>
+      </div>
+
+      <!-- Hypercube Stats & Interactive Bit Matrix -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 text-xs">
+        <!-- Col 1: Mathematical Formulation -->
+        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold">1</span>
+            <h3 class="font-bold text-sm text-white">Hypercube Formulation</h3>
+          </div>
+          <p class="text-slate-300 text-xs leading-relaxed">
+            For <code class="text-indigo-300 font-mono-code">k</code> declared boolean toggles, the system state space forms a k-dimensional hypercube graph <strong class="text-white">Q<sub>k</sub> = (V, E)</strong>:
+          </p>
+          <div class="bg-slate-950 p-3 rounded-lg font-mono-code text-[11px] text-emerald-300 space-y-1 border border-slate-800">
+            <div>• |V| = 2<sup>k</sup> discrete state valuations</div>
+            <div>• |E| = k · 2<sup>k-1</sup> directed Hamming-1 edges</div>
+            <div>• Bound: k ≤ 6 (max 64 states, 384 transitions)</div>
+          </div>
+          <p class="text-slate-400 text-[11px]">
+            Every single directed transition <code class="text-amber-300">(s<sub>a</sub> → s<sub>b</sub>)</code> is verified for vanishing interactive controls without active fallback anchors.
+          </p>
+        </div>
+
+        <!-- Col 2: Active Program State Matrix -->
+        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold">2</span>
+            <h3 class="font-bold text-sm text-white">Active State Valuation Matrix</h3>
+          </div>
+          <div id="hypercubeMatrixView" class="space-y-2 font-mono-code text-[11px]">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Col 3: Transition Invariance & Traps -->
+        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold">3</span>
+            <h3 class="font-bold text-sm text-white">Temporal Focus Invariance</h3>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
+            <div class="text-slate-300 font-semibold">Theorem (Absence of Lost Focus):</div>
+            <div class="text-slate-400 leading-relaxed italic">
+              ∀ (s, s') ∈ E, ∀ e ∈ interactive(s):<br>
+              e ∉ visible(s') ⟹ fallback(e) ∈ visible(s')
+            </div>
+            <div class="pt-2 border-t border-slate-800 text-emerald-400 font-semibold" id="hypercubeInvariantStatus">
+              ✓ Verified: All transitions preserve valid focus anchors.
+            </div>
+          </div>
+          <button onclick="document.getElementById('codeWorkspace').scrollIntoView({behavior: 'smooth'}); closeHypercubeModal();" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-xs transition">
+            Test in Live Code Studio →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4c. Auto-Repair Diff Modal (collapsible) -->
+    <div id="autoRepairModal" class="hidden bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-700 transition-all">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400">Constraint-Based Auto-Repair</span>
+          <h2 class="text-xl font-bold mt-1 text-white">Tab Order Auto-Repair & Unified Diff Viewer (FR8 / FR10)</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Topological re-ordering of scrambled tabindex assignments to match the 2D visual layout sequence sort(y, x).</p>
+        </div>
+        <button onclick="closeAutoRepairModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition text-sm">✕ Close</button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Diff Explanation (5 cols) -->
+        <div class="lg:col-span-5 space-y-4 text-xs">
+          <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <span class="text-rose-400">⚠️</span>
+              <span>The Detected Accessibility Bug</span>
+            </h3>
+            <p class="text-slate-300 leading-relaxed">
+              In <code class="text-amber-300 font-mono-code">buggy_01.dsl</code>, the topmost button is assigned <code class="text-rose-400 font-mono-code">tabindex=2</code> while the lower button is assigned <code class="text-rose-400 font-mono-code">tabindex=1</code>.
+            </p>
+            <p class="text-slate-400">
+              This contradicts <strong>WCAG 2.4.3 (Focus Order)</strong> because keyboard tabbing moves backwards against visual reading order.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <span class="text-emerald-400">🔧</span>
+              <span>Topological Sort Auto-Repair</span>
+            </h3>
+            <p class="text-slate-300 leading-relaxed">
+              A11yCC sorts interactive elements along their spatial coordinates <code class="text-emerald-300 font-mono-code">(y, x)</code> and generates a deterministic patch re-sequencing tab indices without altering UI geometry.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button onclick="applyAutoRepairToEditor()" class="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition shadow-lg active:scale-95 text-xs">
+              <span>⚡ Apply Auto-Repair to Studio Editor</span>
+            </button>
+            <button onclick="closeAutoRepairModal()" class="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition">
+              Dismiss
+            </button>
+          </div>
+        </div>
+
+        <!-- Colorized Unified Diff Box (7 cols) -->
+        <div class="lg:col-span-7 bg-slate-950 rounded-xl border border-slate-800 p-4 font-mono-code text-xs space-y-2 overflow-x-auto shadow-inner">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2 text-[11px] text-slate-400">
+            <span>UNIFIED DIFF: buggy_01.dsl &rarr; buggy_01_repaired.dsl</span>
+            <span class="text-emerald-400 font-bold">+2 / -2 Lines</span>
+          </div>
+          <div class="space-y-1 text-[11px] leading-relaxed">
+            <div class="text-slate-500">--- buggy_01.dsl (Original: Inverted Tab Order)</div>
+            <div class="text-slate-500">+++ buggy_01_repaired.dsl (Auto-Repaired via Topological Sort)</div>
+            <div class="text-indigo-400">@@ -1,5 +1,5 @@</div>
+            <div class="text-slate-300">&nbsp;Container(id="form-root", x=0, y=0) {</div>
+            <div class="bg-rose-950/60 text-rose-300 px-1 py-0.5 rounded border-l-2 border-rose-500">-   Button(id="top-action-btn", x=0, y=0, label="Save Draft", tabindex=2);</div>
+            <div class="bg-emerald-950/60 text-emerald-300 px-1 py-0.5 rounded border-l-2 border-emerald-500">+   Button(id="top-action-btn", x=0, y=0, label="Save Draft", tabindex=1);</div>
+            <div class="bg-rose-950/60 text-rose-300 px-1 py-0.5 rounded border-l-2 border-rose-500">-   Button(id="bottom-action-btn", x=0, y=80, label="Publish Now", tabindex=1);</div>
+            <div class="bg-emerald-950/60 text-emerald-300 px-1 py-0.5 rounded border-l-2 border-emerald-500">+   Button(id="bottom-action-btn", x=0, y=80, label="Publish Now", tabindex=2);</div>
+            <div class="text-slate-300">&nbsp;}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -885,6 +1019,7 @@ Zero focus traps, zero reading order mismatches.`
       if (dslCodeEl) dslCodeEl.textContent = data.code;
       const termEl = document.getElementById('compilerTerminalOut');
       if (termEl) termEl.textContent = data.terminal;
+      updateHypercubeModalContent();
     }
 
     function runLiveCompilation() {
@@ -908,7 +1043,152 @@ Zero focus traps, zero reading order mismatches.`
     }
 
     function openPlanWorkspace() {
-      document.getElementById('codeWorkspace').scrollIntoView({ behavior: 'smooth' });
+      switchView('pipeline');
+    }
+
+    function switchView(viewName) {
+      // 1. Update Navigation Tabs Active Style
+      const navIds = ['overview', 'pipeline', 'hypercube', 'autorepair', 'benchmark'];
+      navIds.forEach(id => {
+        const btn = document.getElementById('nav-' + id);
+        if (btn) {
+          if (id === viewName) {
+            btn.className = 'px-3 py-1.5 rounded-md bg-slate-900 text-white font-semibold shadow-sm transition';
+          } else {
+            btn.className = 'px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition';
+          }
+        }
+      });
+
+      // 2. Perform Action for each view
+      if (viewName === 'overview') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (viewName === 'pipeline') {
+        const target = document.getElementById('codeWorkspace');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+          target.classList.add('ring-4', 'ring-indigo-400', 'ring-offset-2');
+          setTimeout(() => target.classList.remove('ring-4', 'ring-indigo-400', 'ring-offset-2'), 1800);
+          const editor = document.getElementById('dslCustomEditor');
+          if (editor) setTimeout(() => editor.focus(), 600);
+        }
+      } else if (viewName === 'hypercube') {
+        openHypercubeModal();
+      } else if (viewName === 'autorepair') {
+        openAutoRepairModal();
+      } else if (viewName === 'benchmark') {
+        const target = document.getElementById('benchmarkCard');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+          target.classList.add('ring-4', 'ring-emerald-400', 'ring-offset-2');
+          setTimeout(() => target.classList.remove('ring-4', 'ring-emerald-400', 'ring-offset-2'), 1800);
+        }
+      }
+    }
+
+    function openHypercubeModal() {
+      updateHypercubeModalContent();
+      const m = document.getElementById('hypercubeModal');
+      if (m) {
+        m.classList.remove('hidden');
+        m.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function closeHypercubeModal() {
+      const m = document.getElementById('hypercubeModal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function updateHypercubeModalContent() {
+      const selKey = document.getElementById('presetSelector') ? document.getElementById('presetSelector').value : 'buggy_08';
+      const matrixView = document.getElementById('hypercubeMatrixView');
+      const invStatus = document.getElementById('hypercubeInvariantStatus');
+      if (!matrixView) return;
+
+      if (selKey === 'clean_10') {
+        matrixView.innerHTML = `
+          <div class="p-2.5 rounded bg-slate-950 border border-slate-800 space-y-1.5">
+            <div class="text-indigo-400 font-bold">3 Toggles • 8 States (2^3 = 8):</div>
+            <div class="text-slate-400 text-[10px]">Toggles: filterOn, darkTheme, previewMode</div>
+            <div class="grid grid-cols-2 gap-1 pt-1 text-[10px]">
+              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s0: [0, 0, 0] ✓ Safe</div>
+              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s1: [0, 0, 1] ✓ Safe</div>
+              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s2: [0, 1, 0] ✓ Safe</div>
+              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s3: [0, 1, 1] ✓ Safe</div>
+              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s4: [1, 0, 0] ✓ Safe</div>
+              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s5: [1, 0, 1] ✓ Safe</div>
+              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s6: [1, 1, 0] ✓ Safe</div>
+              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s7: [1, 1, 1] ✓ Safe</div>
+            </div>
+            <div class="text-[10px] text-emerald-300 font-semibold pt-1">All 24 directed hypercube edges verified.</div>
+          </div>
+        `;
+        if (invStatus) invStatus.innerHTML = '<span class="text-emerald-400">✓ Invariance Proved: 24/24 transitions preserve valid focus.</span>';
+      } else if (selKey === 'buggy_08') {
+        matrixView.innerHTML = `
+          <div class="p-2.5 rounded bg-slate-950 border border-slate-800 space-y-2">
+            <div class="text-indigo-400 font-bold">1 Toggle • 2 States (2^1 = 2):</div>
+            <div class="text-slate-400 text-[10px]">Toggles: modalOpen</div>
+            <div class="space-y-1 text-[10px]">
+              <div class="bg-slate-900 p-1.5 rounded flex justify-between">
+                <span>s0: {modalOpen: true}</span>
+                <span class="text-emerald-400 font-semibold">4 Elements Visible</span>
+              </div>
+              <div class="bg-slate-900 p-1.5 rounded flex justify-between">
+                <span>s1: {modalOpen: false}</span>
+                <span class="text-amber-400 font-semibold">1 Element Visible</span>
+              </div>
+            </div>
+            <div class="bg-rose-950/80 text-rose-300 p-2 rounded border border-rose-800 text-[10px] space-y-1">
+              <div class="font-bold text-rose-200">❌ Trapped Transition: (s0 → s1)</div>
+              <div>'modal-close-action' disappears with NO focus_fallback declared!</div>
+            </div>
+          </div>
+        `;
+        if (invStatus) invStatus.innerHTML = '<span class="text-rose-400 font-bold">⚠️ Focus Trap Detected: Transition (s0 → s1) fails invariance!</span>';
+      } else {
+        matrixView.innerHTML = `
+          <div class="p-2.5 rounded bg-slate-950 border border-slate-800 space-y-1.5">
+            <div class="text-indigo-400 font-bold">Static UI • 1 State (2^0 = 1):</div>
+            <div class="text-slate-400 text-[10px]">No dynamic boolean toggles declared.</div>
+            <div class="bg-slate-900 p-1.5 rounded text-[10px] text-slate-300">s0: {} (Single root state checked)</div>
+            <div class="text-[10px] text-emerald-400 font-semibold pt-1">0 state transitions required.</div>
+          </div>
+        `;
+        if (invStatus) invStatus.innerHTML = '<span class="text-emerald-400">✓ Single-state static evaluation verified.</span>';
+      }
+    }
+
+    function openAutoRepairModal() {
+      const m = document.getElementById('autoRepairModal');
+      if (m) {
+        m.classList.remove('hidden');
+        m.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function closeAutoRepairModal() {
+      const m = document.getElementById('autoRepairModal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function applyAutoRepairToEditor() {
+      closeAutoRepairModal();
+      const repairedCode = `// Repaired Program: Fixed Tab Order (Topological Sort)
+// WCAG 2.4.3: Tabindex assignments now strictly match visual top-to-bottom sequence
+Container(id="form-root", x=0, y=0) {
+  Button(id="top-action-btn", x=0, y=0, label="Save Draft", tabindex=1);
+  Button(id="bottom-action-btn", x=0, y=80, label="Publish Now", tabindex=2);
+}`;
+      const editor = document.getElementById('dslCustomEditor');
+      if (editor) {
+        editor.value = repairedCode;
+        document.getElementById('editorFileName').innerText = 'buggy_01_repaired.dsl';
+        updateLineCount();
+        compileCustomEditorCode();
+      }
+      switchView('pipeline');
     }
 
     function resetDemo() {
