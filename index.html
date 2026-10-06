@@ -409,36 +409,36 @@
     </div>
 
     <!-- 4. Viva Demo Guided Interactive Drawer (collapsible) -->
-    <div id="vivaModal" class="hidden bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-700">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+    <div id="vivaModal" class="hidden bg-white text-slate-900 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6 border border-slate-200/90 transition-all">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400">Oral Viva Walkthrough Guide</span>
-          <h2 class="text-xl font-bold mt-1 text-white">How to Defend A11yCC to Your Compiler Professor in 3 Minutes</h2>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">Oral Viva Walkthrough Guide</span>
+          <h2 class="text-xl font-bold mt-1 text-slate-900">How to Defend A11yCC to Your Compiler Professor in 3 Minutes</h2>
         </div>
-        <button onclick="closeVivaDemo()" class="text-slate-400 hover:text-white p-1 rounded-lg">✕</button>
+        <button onclick="closeVivaDemo()" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition text-sm font-medium">✕ Close</button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
-          <div class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold">1</div>
-          <h3 class="font-bold text-sm text-white">The Problem Statement</h3>
-          <p class="text-slate-300">
+        <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
+          <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center font-bold text-xs">1</div>
+          <h3 class="font-bold text-sm text-slate-900">The Problem Statement</h3>
+          <p class="text-slate-600 leading-relaxed">
             "Sir, current industry tools like Axe-Core only run on a single DOM render. But modern UIs have conditional states (modals, drawers, steps). If an active button disappears when a modal closes without a focus fallback, the user is trapped in document root."
           </p>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
-          <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold">2</div>
-          <h3 class="font-bold text-sm text-white">The Compiler Novelty</h3>
-          <p class="text-slate-300">
+        <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
+          <div class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold text-xs">2</div>
+          <h3 class="font-bold text-sm text-slate-900">The Compiler Novelty</h3>
+          <p class="text-slate-600 leading-relaxed">
             "Instead of runtime testing, we model accessibility at compile-time. We parse the DSL into an AST with boolean expressions, generate the 2^k state hypercube, and trace every 1-toggle transition to guarantee reachable focus fallbacks across all states."
           </p>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
-          <div class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold">3</div>
-          <h3 class="font-bold text-sm text-white">The Experimental Proof</h3>
-          <p class="text-slate-300">
+        <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
+          <div class="w-6 h-6 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center font-bold text-xs">3</div>
+          <h3 class="font-bold text-sm text-slate-900">The Experimental Proof</h3>
+          <p class="text-slate-600 leading-relaxed">
             "We built a 20-program benchmark. A11yCC achieved 100% precision with 0 false positives on clean code, and 100% recall. On transition traps, Axe-Core caught 0% because of its single-render blindspot, while our compiler caught 100% in under 1 millisecond."
           </p>
         </div>
@@ -446,42 +446,42 @@
     </div>
 
     <!-- 4b. 2^k Hypercube State-Space Model Checking Inspector Modal (collapsible) -->
-    <div id="hypercubeModal" class="hidden bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-700 transition-all">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+    <div id="hypercubeModal" class="hidden bg-white text-slate-900 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6 border border-slate-200/90 transition-all">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400">Formal Verification Engine</span>
-          <h2 class="text-xl font-bold mt-1 text-white">2<sup>k</sup> Bounded Model Checking Hypercube Inspector (Q<sub>k</sub>)</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Exhaustive state space enumeration and 1-toggle transition edge analysis across all reachable configurations.</p>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">Formal Verification Engine</span>
+          <h2 class="text-xl font-bold mt-1 text-slate-900">2<sup>k</sup> Bounded Model Checking Hypercube Inspector (Q<sub>k</sub>)</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Exhaustive state space enumeration and 1-toggle transition edge analysis across all reachable configurations.</p>
         </div>
-        <button onclick="closeHypercubeModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition text-sm">✕ Close</button>
+        <button onclick="closeHypercubeModal()" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition text-sm font-medium">✕ Close</button>
       </div>
 
       <!-- Hypercube Stats & Interactive Bit Matrix -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 text-xs">
         <!-- Col 1: Mathematical Formulation -->
-        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+        <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-3">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold">1</span>
-            <h3 class="font-bold text-sm text-white">Hypercube Formulation</h3>
+            <span class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center font-bold text-xs">1</span>
+            <h3 class="font-bold text-sm text-slate-900">Hypercube Formulation</h3>
           </div>
-          <p class="text-slate-300 text-xs leading-relaxed">
-            For <code class="text-indigo-300 font-mono-code">k</code> declared boolean toggles, the system state space forms a k-dimensional hypercube graph <strong class="text-white">Q<sub>k</sub> = (V, E)</strong>:
+          <p class="text-slate-600 text-xs leading-relaxed">
+            For <code class="text-indigo-700 font-mono-code bg-indigo-50/60 px-1 py-0.5 rounded border border-indigo-100">k</code> declared boolean toggles, the system state space forms a k-dimensional hypercube graph <strong class="text-slate-900">Q<sub>k</sub> = (V, E)</strong>:
           </p>
-          <div class="bg-slate-950 p-3 rounded-lg font-mono-code text-[11px] text-emerald-300 space-y-1 border border-slate-800">
+          <div class="bg-white p-3 rounded-lg font-mono-code text-[11px] text-emerald-800 space-y-1 border border-emerald-200/80 shadow-xs">
             <div>• |V| = 2<sup>k</sup> discrete state valuations</div>
             <div>• |E| = k · 2<sup>k-1</sup> directed Hamming-1 edges</div>
             <div>• Bound: k ≤ 6 (max 64 states, 384 transitions)</div>
           </div>
-          <p class="text-slate-400 text-[11px]">
-            Every single directed transition <code class="text-amber-300">(s<sub>a</sub> → s<sub>b</sub>)</code> is verified for vanishing interactive controls without active fallback anchors.
+          <p class="text-slate-500 text-[11px]">
+            Every single directed transition <code class="text-amber-800 bg-amber-50 px-1 py-0.5 rounded border border-amber-200 font-mono-code">(s<sub>a</sub> → s<sub>b</sub>)</code> is verified for vanishing interactive controls without active fallback anchors.
           </p>
         </div>
 
         <!-- Col 2: Active Program State Matrix -->
-        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+        <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-3">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold">2</span>
-            <h3 class="font-bold text-sm text-white">Active State Valuation Matrix</h3>
+            <span class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold text-xs">2</span>
+            <h3 class="font-bold text-sm text-slate-900">Active State Valuation Matrix</h3>
           </div>
           <div id="hypercubeMatrixView" class="space-y-2 font-mono-code text-[11px]">
             <!-- Rendered dynamically -->
@@ -489,22 +489,22 @@
         </div>
 
         <!-- Col 3: Transition Invariance & Traps -->
-        <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+        <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-3">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold">3</span>
-            <h3 class="font-bold text-sm text-white">Temporal Focus Invariance</h3>
+            <span class="w-6 h-6 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center font-bold text-xs">3</span>
+            <h3 class="font-bold text-sm text-slate-900">Temporal Focus Invariance</h3>
           </div>
-          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-            <div class="text-slate-300 font-semibold">Theorem (Absence of Lost Focus):</div>
-            <div class="text-slate-400 leading-relaxed italic">
+          <div class="p-3 rounded-lg bg-white border border-slate-200 space-y-2 text-[11px] shadow-xs">
+            <div class="text-slate-800 font-semibold">Theorem (Absence of Lost Focus):</div>
+            <div class="text-slate-600 leading-relaxed italic font-mono-code">
               ∀ (s, s') ∈ E, ∀ e ∈ interactive(s):<br>
               e ∉ visible(s') ⟹ fallback(e) ∈ visible(s')
             </div>
-            <div class="pt-2 border-t border-slate-800 text-emerald-400 font-semibold" id="hypercubeInvariantStatus">
+            <div class="pt-2 border-t border-slate-100 text-emerald-700 font-semibold" id="hypercubeInvariantStatus">
               ✓ Verified: All transitions preserve valid focus anchors.
             </div>
           </div>
-          <button onclick="document.getElementById('codeWorkspace').scrollIntoView({behavior: 'smooth'}); closeHypercubeModal();" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-xs transition">
+          <button onclick="document.getElementById('codeWorkspace').scrollIntoView({behavior: 'smooth'}); closeHypercubeModal();" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-xs transition shadow-sm">
             Test in Live Code Studio →
           </button>
         </div>
@@ -512,68 +512,68 @@
     </div>
 
     <!-- 4c. Auto-Repair Diff Modal (collapsible) -->
-    <div id="autoRepairModal" class="hidden bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-700 transition-all">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+    <div id="autoRepairModal" class="hidden bg-white text-slate-900 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6 border border-slate-200/90 transition-all">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400">Constraint-Based Auto-Repair</span>
-          <h2 class="text-xl font-bold mt-1 text-white">Tab Order Auto-Repair & Unified Diff Viewer (FR8 / FR10)</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Topological re-ordering of scrambled tabindex assignments to match the 2D visual layout sequence sort(y, x).</p>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">Constraint-Based Auto-Repair</span>
+          <h2 class="text-xl font-bold mt-1 text-slate-900">Tab Order Auto-Repair & Unified Diff Viewer (FR8 / FR10)</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Topological re-ordering of scrambled tabindex assignments to match the 2D visual layout sequence sort(y, x).</p>
         </div>
-        <button onclick="closeAutoRepairModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition text-sm">✕ Close</button>
+        <button onclick="closeAutoRepairModal()" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition text-sm font-medium">✕ Close</button>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Diff Explanation (5 cols) -->
         <div class="lg:col-span-5 space-y-4 text-xs">
-          <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
-            <h3 class="font-bold text-sm text-white flex items-center gap-2">
-              <span class="text-rose-400">⚠️</span>
+          <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
+            <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <span class="text-rose-500">⚠️</span>
               <span>The Detected Accessibility Bug</span>
             </h3>
-            <p class="text-slate-300 leading-relaxed">
-              In <code class="text-amber-300 font-mono-code">buggy_01.dsl</code>, the topmost button is assigned <code class="text-rose-400 font-mono-code">tabindex=2</code> while the lower button is assigned <code class="text-rose-400 font-mono-code">tabindex=1</code>.
+            <p class="text-slate-600 leading-relaxed">
+              In <code class="text-amber-800 bg-amber-50 px-1 py-0.5 rounded border border-amber-200 font-mono-code">buggy_01.dsl</code>, the topmost button is assigned <code class="text-rose-700 bg-rose-50 px-1 py-0.5 rounded border border-rose-200 font-mono-code">tabindex=2</code> while the lower button is assigned <code class="text-rose-700 bg-rose-50 px-1 py-0.5 rounded border border-rose-200 font-mono-code">tabindex=1</code>.
             </p>
-            <p class="text-slate-400">
-              This contradicts <strong>WCAG 2.4.3 (Focus Order)</strong> because keyboard tabbing moves backwards against visual reading order.
+            <p class="text-slate-500">
+              This contradicts <strong class="text-slate-700">WCAG 2.4.3 (Focus Order)</strong> because keyboard tabbing moves backwards against visual reading order.
             </p>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
-            <h3 class="font-bold text-sm text-white flex items-center gap-2">
-              <span class="text-emerald-400">🔧</span>
+          <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
+            <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <span class="text-emerald-600">🔧</span>
               <span>Topological Sort Auto-Repair</span>
             </h3>
-            <p class="text-slate-300 leading-relaxed">
-              A11yCC sorts interactive elements along their spatial coordinates <code class="text-emerald-300 font-mono-code">(y, x)</code> and generates a deterministic patch re-sequencing tab indices without altering UI geometry.
+            <p class="text-slate-600 leading-relaxed">
+              A11yCC sorts interactive elements along their spatial coordinates <code class="text-emerald-800 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200 font-mono-code">(y, x)</code> and generates a deterministic patch re-sequencing tab indices without altering UI geometry.
             </p>
           </div>
 
           <div class="flex items-center gap-3 pt-2">
-            <button onclick="applyAutoRepairToEditor()" class="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition shadow-lg active:scale-95 text-xs">
+            <button onclick="applyAutoRepairToEditor()" class="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition shadow-sm active:scale-95 text-xs">
               <span>⚡ Apply Auto-Repair to Studio Editor</span>
             </button>
-            <button onclick="closeAutoRepairModal()" class="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition">
+            <button onclick="closeAutoRepairModal()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition border border-slate-200">
               Dismiss
             </button>
           </div>
         </div>
 
         <!-- Colorized Unified Diff Box (7 cols) -->
-        <div class="lg:col-span-7 bg-slate-950 rounded-xl border border-slate-800 p-4 font-mono-code text-xs space-y-2 overflow-x-auto shadow-inner">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2 text-[11px] text-slate-400">
+        <div class="lg:col-span-7 bg-slate-50 rounded-xl border border-slate-200 p-4 font-mono-code text-xs space-y-2 overflow-x-auto shadow-inner">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2 text-[11px] text-slate-500 font-medium">
             <span>UNIFIED DIFF: buggy_01.dsl &rarr; buggy_01_repaired.dsl</span>
-            <span class="text-emerald-400 font-bold">+2 / -2 Lines</span>
+            <span class="text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">+2 / -2 Lines</span>
           </div>
           <div class="space-y-1 text-[11px] leading-relaxed">
-            <div class="text-slate-500">--- buggy_01.dsl (Original: Inverted Tab Order)</div>
-            <div class="text-slate-500">+++ buggy_01_repaired.dsl (Auto-Repaired via Topological Sort)</div>
-            <div class="text-indigo-400">@@ -1,5 +1,5 @@</div>
-            <div class="text-slate-300">&nbsp;Container(id="form-root", x=0, y=0) {</div>
-            <div class="bg-rose-950/60 text-rose-300 px-1 py-0.5 rounded border-l-2 border-rose-500">-   Button(id="top-action-btn", x=0, y=0, label="Save Draft", tabindex=2);</div>
-            <div class="bg-emerald-950/60 text-emerald-300 px-1 py-0.5 rounded border-l-2 border-emerald-500">+   Button(id="top-action-btn", x=0, y=0, label="Save Draft", tabindex=1);</div>
-            <div class="bg-rose-950/60 text-rose-300 px-1 py-0.5 rounded border-l-2 border-rose-500">-   Button(id="bottom-action-btn", x=0, y=80, label="Publish Now", tabindex=1);</div>
-            <div class="bg-emerald-950/60 text-emerald-300 px-1 py-0.5 rounded border-l-2 border-emerald-500">+   Button(id="bottom-action-btn", x=0, y=80, label="Publish Now", tabindex=2);</div>
-            <div class="text-slate-300">&nbsp;}</div>
+            <div class="text-slate-400">--- buggy_01.dsl (Original: Inverted Tab Order)</div>
+            <div class="text-slate-400">+++ buggy_01_repaired.dsl (Auto-Repaired via Topological Sort)</div>
+            <div class="text-indigo-600 font-semibold">@@ -1,5 +1,5 @@</div>
+            <div class="text-slate-700">&nbsp;Container(id="form-root", x=0, y=0) {</div>
+            <div class="bg-rose-50 text-rose-800 px-2 py-0.5 rounded border-l-2 border-rose-500 font-medium">-   Button(id="top-action-btn", x=0, y=0, label="Save Draft", tabindex=2);</div>
+            <div class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border-l-2 border-emerald-500 font-medium">+   Button(id="top-action-btn", x=0, y=0, label="Save Draft", tabindex=1);</div>
+            <div class="bg-rose-50 text-rose-800 px-2 py-0.5 rounded border-l-2 border-rose-500 font-medium">-   Button(id="bottom-action-btn", x=0, y=80, label="Publish Now", tabindex=1);</div>
+            <div class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border-l-2 border-emerald-500 font-medium">+   Button(id="bottom-action-btn", x=0, y=80, label="Publish Now", tabindex=2);</div>
+            <div class="text-slate-700">&nbsp;}</div>
           </div>
         </div>
       </div>
@@ -1108,55 +1108,55 @@ Zero focus traps, zero reading order mismatches.`
 
       if (selKey === 'clean_10') {
         matrixView.innerHTML = `
-          <div class="p-2.5 rounded bg-slate-950 border border-slate-800 space-y-1.5">
-            <div class="text-indigo-400 font-bold">3 Toggles • 8 States (2^3 = 8):</div>
-            <div class="text-slate-400 text-[10px]">Toggles: filterOn, darkTheme, previewMode</div>
-            <div class="grid grid-cols-2 gap-1 pt-1 text-[10px]">
-              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s0: [0, 0, 0] ✓ Safe</div>
-              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s1: [0, 0, 1] ✓ Safe</div>
-              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s2: [0, 1, 0] ✓ Safe</div>
-              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s3: [0, 1, 1] ✓ Safe</div>
-              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s4: [1, 0, 0] ✓ Safe</div>
-              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s5: [1, 0, 1] ✓ Safe</div>
-              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s6: [1, 1, 0] ✓ Safe</div>
-              <div class="bg-slate-900 p-1.5 rounded text-emerald-400">s7: [1, 1, 1] ✓ Safe</div>
+          <div class="p-2.5 rounded-lg bg-white border border-slate-200 space-y-1.5 shadow-xs">
+            <div class="text-indigo-700 font-bold">3 Toggles • 8 States (2^3 = 8):</div>
+            <div class="text-slate-500 text-[10px]">Toggles: filterOn, darkTheme, previewMode</div>
+            <div class="grid grid-cols-2 gap-1.5 pt-1 text-[10px]">
+              <div class="bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-1.5 rounded-md font-medium">s0: [0, 0, 0] ✓ Safe</div>
+              <div class="bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-1.5 rounded-md font-medium">s1: [0, 0, 1] ✓ Safe</div>
+              <div class="bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-1.5 rounded-md font-medium">s2: [0, 1, 0] ✓ Safe</div>
+              <div class="bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-1.5 rounded-md font-medium">s3: [0, 1, 1] ✓ Safe</div>
+              <div class="bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-1.5 rounded-md font-medium">s4: [1, 0, 0] ✓ Safe</div>
+              <div class="bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-1.5 rounded-md font-medium">s5: [1, 0, 1] ✓ Safe</div>
+              <div class="bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-1.5 rounded-md font-medium">s6: [1, 1, 0] ✓ Safe</div>
+              <div class="bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-1.5 rounded-md font-medium">s7: [1, 1, 1] ✓ Safe</div>
             </div>
-            <div class="text-[10px] text-emerald-300 font-semibold pt-1">All 24 directed hypercube edges verified.</div>
+            <div class="text-[10px] text-emerald-700 font-semibold pt-1">All 24 directed hypercube edges verified.</div>
           </div>
         `;
-        if (invStatus) invStatus.innerHTML = '<span class="text-emerald-400">✓ Invariance Proved: 24/24 transitions preserve valid focus.</span>';
+        if (invStatus) invStatus.innerHTML = '<span class="text-emerald-700">✓ Invariance Proved: 24/24 transitions preserve valid focus.</span>';
       } else if (selKey === 'buggy_08') {
         matrixView.innerHTML = `
-          <div class="p-2.5 rounded bg-slate-950 border border-slate-800 space-y-2">
-            <div class="text-indigo-400 font-bold">1 Toggle • 2 States (2^1 = 2):</div>
-            <div class="text-slate-400 text-[10px]">Toggles: modalOpen</div>
-            <div class="space-y-1 text-[10px]">
-              <div class="bg-slate-900 p-1.5 rounded flex justify-between">
-                <span>s0: {modalOpen: true}</span>
-                <span class="text-emerald-400 font-semibold">4 Elements Visible</span>
+          <div class="p-2.5 rounded-lg bg-white border border-slate-200 space-y-2 shadow-xs">
+            <div class="text-indigo-700 font-bold">1 Toggle • 2 States (2^1 = 2):</div>
+            <div class="text-slate-500 text-[10px]">Toggles: modalOpen</div>
+            <div class="space-y-1.5 text-[10px]">
+              <div class="bg-slate-50 border border-slate-200 p-1.5 rounded-md flex justify-between text-slate-700">
+                <span class="font-medium">s0: {modalOpen: true}</span>
+                <span class="text-emerald-700 font-semibold">4 Elements Visible</span>
               </div>
-              <div class="bg-slate-900 p-1.5 rounded flex justify-between">
-                <span>s1: {modalOpen: false}</span>
-                <span class="text-amber-400 font-semibold">1 Element Visible</span>
+              <div class="bg-slate-50 border border-slate-200 p-1.5 rounded-md flex justify-between text-slate-700">
+                <span class="font-medium">s1: {modalOpen: false}</span>
+                <span class="text-amber-700 font-semibold">1 Element Visible</span>
               </div>
             </div>
-            <div class="bg-rose-950/80 text-rose-300 p-2 rounded border border-rose-800 text-[10px] space-y-1">
-              <div class="font-bold text-rose-200">❌ Trapped Transition: (s0 → s1)</div>
+            <div class="bg-rose-50 text-rose-800 p-2 rounded-md border border-rose-200 text-[10px] space-y-1">
+              <div class="font-bold text-rose-900">❌ Trapped Transition: (s0 → s1)</div>
               <div>'modal-close-action' disappears with NO focus_fallback declared!</div>
             </div>
           </div>
         `;
-        if (invStatus) invStatus.innerHTML = '<span class="text-rose-400 font-bold">⚠️ Focus Trap Detected: Transition (s0 → s1) fails invariance!</span>';
+        if (invStatus) invStatus.innerHTML = '<span class="text-rose-700 font-bold">⚠️ Focus Trap Detected: Transition (s0 → s1) fails invariance!</span>';
       } else {
         matrixView.innerHTML = `
-          <div class="p-2.5 rounded bg-slate-950 border border-slate-800 space-y-1.5">
-            <div class="text-indigo-400 font-bold">Static UI • 1 State (2^0 = 1):</div>
-            <div class="text-slate-400 text-[10px]">No dynamic boolean toggles declared.</div>
-            <div class="bg-slate-900 p-1.5 rounded text-[10px] text-slate-300">s0: {} (Single root state checked)</div>
-            <div class="text-[10px] text-emerald-400 font-semibold pt-1">0 state transitions required.</div>
+          <div class="p-2.5 rounded-lg bg-white border border-slate-200 space-y-1.5 shadow-xs">
+            <div class="text-indigo-700 font-bold">Static UI • 1 State (2^0 = 1):</div>
+            <div class="text-slate-500 text-[10px]">No dynamic boolean toggles declared.</div>
+            <div class="bg-slate-50 border border-slate-200 p-1.5 rounded-md text-[10px] text-slate-700 font-medium">s0: {} (Single root state checked)</div>
+            <div class="text-[10px] text-emerald-700 font-semibold pt-1">0 state transitions required.</div>
           </div>
         `;
-        if (invStatus) invStatus.innerHTML = '<span class="text-emerald-400">✓ Single-state static evaluation verified.</span>';
+        if (invStatus) invStatus.innerHTML = '<span class="text-emerald-700">✓ Single-state static evaluation verified.</span>';
       }
     }
 
