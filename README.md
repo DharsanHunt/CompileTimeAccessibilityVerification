@@ -146,9 +146,35 @@ python -m unittest discover -s tests -v
 
 ---
 
+---
+
+## Visual Studio & Verification Artifacts
+
+### 1. Studio Dashboard & Bounded Hypercube Telemetry
+![A11yCC Verification Studio Dashboard](https://raw.githubusercontent.com/DharsanHunt/CompileTimeAccessibilityVerification/b51e411db2f2fa1b8b5f64119eb68e73261d9835/presentation_screenshots/shot_hero_kpis.png)
+*Exhaustive bounded model checking exploring $2^k$ states in under 1.5 ms with 100% precision and recall.*
+
+### 2. Dual-Pane DSL Code Editor & Real-Time Verified Console
+![Interactive DSL Code Editor](https://raw.githubusercontent.com/DharsanHunt/CompileTimeAccessibilityVerification/b51e411db2f2fa1b8b5f64119eb68e73261d9835/presentation_screenshots/shot_editor_clean.png)
+*Monaco-style custom DSL editor compiling in real time and confirming zero WCAG violations.*
+
+### 3. Defect Diagnostic Engine & Actionable Remediation
+![Accessibility Defect Diagnostic Console](https://raw.githubusercontent.com/DharsanHunt/CompileTimeAccessibilityVerification/b51e411db2f2fa1b8b5f64119eb68e73261d9835/presentation_screenshots/shot_editor_violation.png)
+*Detects vanishing focus traps on state transitions with offending line/column coordinates and suggested remediation.*
+
+### 4. DSL-to-Website Reactive Browser Sandbox
+![Reactive Browser Mockup and UI Stage](https://raw.githubusercontent.com/DharsanHunt/CompileTimeAccessibilityVerification/b51e411db2f2fa1b8b5f64119eb68e73261d9835/presentation_screenshots/shot_browser_sandbox.png)
+*Standalone interactive browser frame demonstrating working state machine toggles and accessible focus restoration.*
+
+### 5. Empirical Benchmark Comparison Matrix
+![Empirical Benchmark Comparison Matrix](https://raw.githubusercontent.com/DharsanHunt/CompileTimeAccessibilityVerification/b51e411db2f2fa1b8b5f64119eb68e73261d9835/presentation_screenshots/shot_benchmark_matrix.png)
+*Comparison against industry baselines highlighting 100% recall on dynamic transition traps where axe-core detects 0%.*
+
+---
+
 ## Project Review 2 Deliverables (75% Milestone)
 
-- **Presentation Slide Deck**: [`A11yCC_Project_Review_2_Presentation.pptx`](A11yCC_Project_Review_2_Presentation.pptx) (13 slides with embedded live studio screenshots, 75% implementation scorecard, empirical benchmark matrices, and future roadmap).
-- **Comprehensive Word Report**: [`A11yCC_Project_Review_2_Report.docx`](A11yCC_Project_Review_2_Report.docx) (Full system design, EBNF grammar, formal model checking algorithms, and benchmark evaluation).
+- **Presentation Slide Deck**: `A11yCC_Project_Review_2_Presentation.pptx` (13 slides with embedded live studio screenshots, 75% implementation scorecard, empirical benchmark matrices, and future roadmap).
+- **Comprehensive Word Report**: `A11yCC_Project_Review_2_Report.docx` (Full system design, EBNF grammar, formal model checking algorithms, and benchmark evaluation).
 - **Interactive Web Studio**: [`a11ycc_lab.html`](a11ycc_lab.html) (Client-side compiler laboratory with dual-pane code editor, live WCAG diagnostic console, and standalone HTML exporter).
-- **Presentation Screenshots**: [`presentation_screenshots/`](presentation_screenshots/) (High-resolution cropped figures capturing studio telemetry, defect console, and reactive browser sandbox).
+
