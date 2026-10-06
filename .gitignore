@@ -37,3 +37,8 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Documents / Presentations
+*.docx
+*.pptx
+*.ppt
