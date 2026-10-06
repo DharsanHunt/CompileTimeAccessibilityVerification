@@ -176,5 +176,5 @@ python -m unittest discover -s tests -v
 
 - **Presentation Slide Deck**: `A11yCC_Project_Review_2_Presentation.pptx` (13 slides with embedded live studio screenshots, 75% implementation scorecard, empirical benchmark matrices, and future roadmap).
 - **Comprehensive Word Report**: `A11yCC_Project_Review_2_Report.docx` (Full system design, EBNF grammar, formal model checking algorithms, and benchmark evaluation).
-- **Interactive Web Studio**: [`a11ycc_lab.html`](a11ycc_lab.html) (Client-side compiler laboratory with dual-pane code editor, live WCAG diagnostic console, and standalone HTML exporter).
+- **Interactive Web Studio**: [`index.html`](index.html) (Client-side compiler laboratory with dual-pane code editor, live WCAG diagnostic console, and standalone HTML exporter).
 

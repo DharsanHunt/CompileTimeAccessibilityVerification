@@ -99,8 +99,8 @@ def cli_main(args: Optional[list[str]] = None) -> int:
         import webbrowser
         port = parsed_args.port
         handler = http.server.SimpleHTTPRequestHandler
-        print(f"Starting A11yCC Studio at http://localhost:{port}/a11ycc_lab.html ...")
-        webbrowser.open(f"http://localhost:{port}/a11ycc_lab.html")
+        print(f"Starting A11yCC Studio at http://localhost:{port}/index.html ...")
+        webbrowser.open(f"http://localhost:{port}/index.html")
         try:
             with socketserver.TCPServer(("", port), handler) as httpd:
                 print("Press Ctrl+C to stop the server.")
