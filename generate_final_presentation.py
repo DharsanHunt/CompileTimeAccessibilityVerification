@@ -98,7 +98,7 @@ def create_presentation():
     pill = add_card(s1, Inches(1.5), Inches(1.3), Inches(4.5), Inches(0.4),
                     bg_color=RGBColor(49, 46, 129), border_color=ACCENT_INDIGO)
     tf_pill = pill.text_frame
-    tf_pill.text = "FINAL PROJECT DEFENSE • REVIEW 3 (100% COMPLETE)"
+    tf_pill.text = "PROJECT REVIEW 2 • 100% FULL PROJECT SHOWCASE & DEFENSE"
     tf_pill.paragraphs[0].font.size = Pt(10)
     tf_pill.paragraphs[0].font.bold = True
     tf_pill.paragraphs[0].font.color.rgb = RGBColor(199, 210, 254)
@@ -626,9 +626,9 @@ def create_presentation():
                "Real-time compile-time accessibility checking with sub-millisecond latency")
 
     # Left: Screenshot
-    img_clean = screenshots_dir / "crop_editor_clean.png"
+    img_clean = screenshots_dir / "showcase_3_editor_clean_verified.png"
     if not img_clean.exists():
-        img_clean = screenshots_dir / "shot_3_editor_clean_verified.png"
+        img_clean = screenshots_dir / "crop_editor_clean.png"
     if img_clean.exists():
         s11.shapes.add_picture(str(img_clean), Inches(0.8), Inches(1.7), Inches(6.8), Inches(5.1))
 
@@ -644,8 +644,8 @@ def create_presentation():
     p.font.color.rgb = ACCENT_EMERALD
 
     studio_clean_pts = [
-        ("Sub-Millisecond Verification", "Analyzes declarative UI DSL programs in < 2 ms directly within the browser using the embedded JsROBDD engine."),
-        ("2^k Hypercube Graph Inspector", "Interactive 3D/2D visualization of the state hypercube showing all reachable nodes and active transitions."),
+        ("Sub-Millisecond Verification", "Analyzes declarative UI DSL programs in < 1.5 ms directly within the browser using the embedded JsROBDD engine."),
+        ("2^k Hypercube Graph Inspector", "Interactive visualization of the state hypercube Q_k showing all 2^k reachable valuations and Hamming-1 directed transitions."),
         ("Accessible Name Inspection", "Real-time table of all UI widgets verifying WCAG 4.1.2 accessible name computation for every element."),
         ("Clean Compilation Banner", "Green status card confirming 0 violations detected across all state trajectories with full formal guarantees.")
     ]
@@ -671,9 +671,9 @@ def create_presentation():
                "Exhaustive bug identification with exact transition paths and 1-click automated repair")
 
     # Left: Defect screenshot
-    img_violation = screenshots_dir / "crop_editor_violation.png"
+    img_violation = screenshots_dir / "showcase_4_editor_defect_diagnostic.png"
     if not img_violation.exists():
-        img_violation = screenshots_dir / "shot_4_editor_violation_diagnostic.png"
+        img_violation = screenshots_dir / "crop_editor_violation.png"
     if img_violation.exists():
         s12.shapes.add_picture(str(img_violation), Inches(0.8), Inches(1.7), Inches(6.8), Inches(5.1))
 
@@ -689,10 +689,10 @@ def create_presentation():
     p.font.color.rgb = ACCENT_ROSE
 
     violation_pts = [
-        ("Counterexample State Trace", "Pinpoints the exact state transition causing the failure: State 0 (isModalOpen=false) -> State 1 (isModalOpen=true)."),
-        ("Defect Classification", "Identifies specific WCAG rule violated: e.g. 'Vanishing Focus: element [close-btn] unmounted without fallback anchor'."),
-        ("1-Click Auto-Repair Button", "Renders a prominent 'Auto-Repair Code' button beneath the compiler output window whenever errors are found."),
-        ("Split-Pane Unified Diff", "Visualizes exact AST code modifications in green/red diff before allowing developer to apply them.")
+        ("Counterexample State Trace", "Pinpoints the exact state transition causing the failure: State 0 (modalOpen=false) -> State 1 (modalOpen=true)."),
+        ("Defect Classification", "Identifies specific WCAG rule violated: e.g. 'PotentialFocusTrap: element [modal-close-action] unmounted without fallback anchor'."),
+        ("1-Click Auto-Repair Button", "Renders a prominent '⚡ Auto-Repair Code & Fix' button beneath the compiler output whenever defects are detected."),
+        ("1-Click Undo Capability", "Preserves the original pre-repair snapshot with an instant '↩️ Undo Repair' button in the output banner.")
     ]
     for pt_t, pt_d in violation_pts:
         p_it = tf_r.add_paragraph()
@@ -709,14 +709,44 @@ def create_presentation():
         p_id.space_before = Pt(2)
 
     # =========================================================================
-    # SLIDE 13: Empirical Evaluation: 30-Benchmark Results Matrix
+    # SLIDE 13: Visual Showcase: React JSX Importer & Auto-Repair Unified Diff
     # =========================================================================
     s13 = prs.slides.add_slide(blank_layout)
-    add_header(s13, "Empirical Evaluation", "Academic Benchmark Suite: 30 Programs (15 Clean, 15 Buggy)",
+    add_header(s13, "Live Web Studio Showcase", "React JSX/TSX Importer & Topological Auto-Repair Unified Diff",
+               "Zero-friction React adoption and algorithmic code synthesis with side-by-side verification")
+
+    img_jsx = screenshots_dir / "showcase_6_react_jsx_modal.png"
+    if img_jsx.exists():
+        s13.shapes.add_picture(str(img_jsx), Inches(0.8), Inches(1.7), Inches(5.6), Inches(5.1))
+
+    img_diff = screenshots_dir / "showcase_8_autorepair_diff.png"
+    if img_diff.exists():
+        s13.shapes.add_picture(str(img_diff), Inches(6.8), Inches(1.7), Inches(5.7), Inches(5.1))
+
+    # =========================================================================
+    # SLIDE 14: Visual Showcase: 2^k Hypercube Inspector & Live Website Sandbox
+    # =========================================================================
+    s14 = prs.slides.add_slide(blank_layout)
+    add_header(s14, "Live Web Studio Showcase", "2^k Hypercube Inspector & Audio Screen Reader Simulation Stage",
+               "Formal state-space inspection alongside realistic interactive accessibility simulation")
+
+    img_hypercube = screenshots_dir / "showcase_5_hypercube_inspector.png"
+    if img_hypercube.exists():
+        s14.shapes.add_picture(str(img_hypercube), Inches(0.8), Inches(1.7), Inches(5.6), Inches(5.1))
+
+    img_sandbox = screenshots_dir / "showcase_7_live_website_sandbox.png"
+    if img_sandbox.exists():
+        s14.shapes.add_picture(str(img_sandbox), Inches(6.8), Inches(1.7), Inches(5.7), Inches(5.1))
+
+    # =========================================================================
+    # SLIDE 15: Empirical Evaluation: 30-Benchmark Results Matrix
+    # =========================================================================
+    s15 = prs.slides.add_slide(blank_layout)
+    add_header(s15, "Empirical Evaluation", "Academic Benchmark Suite: 30 Programs (15 Clean, 15 Buggy)",
                "Rigorous empirical evaluation demonstrating 100.00% Precision and 100.00% Recall")
 
     # Table of Benchmark Results
-    table_shape = s13.shapes.add_table(5, 5, Inches(0.8), Inches(1.7), Inches(11.733), Inches(3.2))
+    table_shape = s15.shapes.add_table(5, 5, Inches(0.8), Inches(1.7), Inches(11.733), Inches(3.2))
     table = table_shape.table
 
     # Column widths
@@ -762,8 +792,8 @@ def create_presentation():
     ]
     for idx, (val, title, desc, col) in enumerate(kpi_cards):
         cx = Inches(0.8 + idx * 2.98)
-        c = add_card(s13, cx, Inches(5.2), Inches(2.8), Inches(1.7), border_color=col)
-        tf = s13.shapes.add_textbox(cx + Inches(0.15), Inches(5.3), Inches(2.5), Inches(1.5)).text_frame
+        c = add_card(s15, cx, Inches(5.2), Inches(2.8), Inches(1.7), border_color=col)
+        tf = s15.shapes.add_textbox(cx + Inches(0.15), Inches(5.3), Inches(2.5), Inches(1.5)).text_frame
         tf.word_wrap = True
 
         p_v = tf.paragraphs[0]
@@ -786,13 +816,13 @@ def create_presentation():
         p_d.space_before = Pt(2)
 
     # =========================================================================
-    # SLIDE 14: Comprehensive Industry Comparison: A11yCC vs SOTA
+    # SLIDE 16: Comprehensive Industry Comparison: A11yCC vs SOTA
     # =========================================================================
-    s14 = prs.slides.add_slide(blank_layout)
-    add_header(s14, "State-of-the-Art Comparison", "Comparative Performance: A11yCC vs Industry Verification Tools",
+    s16 = prs.slides.add_slide(blank_layout)
+    add_header(s16, "State-of-the-Art Comparison", "Comparative Performance: A11yCC vs Industry Verification Tools",
                "Evaluating verification guarantees, dynamic coverage, and developer feedback latency")
 
-    table_shape = s14.shapes.add_table(6, 6, Inches(0.8), Inches(1.7), Inches(11.733), Inches(5.1))
+    table_shape = s16.shapes.add_table(6, 6, Inches(0.8), Inches(1.7), Inches(11.733), Inches(5.1))
     table = table_shape.table
 
     col_widths = [Inches(2.1), Inches(1.7), Inches(2.0), Inches(2.0), Inches(1.9), Inches(2.033)]
@@ -831,10 +861,10 @@ def create_presentation():
             p.font.color.rgb = ACCENT_EMERALD if (is_a11ycc and col_idx > 1) else (TEXT_WHITE if is_a11ycc else TEXT_LIGHT)
 
     # =========================================================================
-    # SLIDE 15: Engineering Rigor, Test Suite & CI/CD Verification
+    # SLIDE 17: Engineering Rigor, Test Suite & CI/CD Verification
     # =========================================================================
-    s15 = prs.slides.add_slide(blank_layout)
-    add_header(s15, "Engineering Quality & Verification", "Rigorous Quality Assurance: 39 Unit Tests & Multi-Platform CI/CD",
+    s17 = prs.slides.add_slide(blank_layout)
+    add_header(s17, "Engineering Quality & Verification", "Rigorous Quality Assurance: 39 Unit Tests & Multi-Platform CI/CD",
                "Ensuring flawless compiler correctness, stability, and zero runtime dependency compliance")
 
     eng_pillars = [
@@ -854,8 +884,8 @@ def create_presentation():
 
     for idx, (title, items) in enumerate(eng_pillars):
         cx = Inches(0.8 + idx * 3.98)
-        c = add_card(s15, cx, Inches(1.7), Inches(3.78), Inches(5.2))
-        tf = s15.shapes.add_textbox(cx + Inches(0.2), Inches(1.85), Inches(3.38), Inches(4.9)).text_frame
+        c = add_card(s17, cx, Inches(1.7), Inches(3.78), Inches(5.2))
+        tf = s17.shapes.add_textbox(cx + Inches(0.2), Inches(1.85), Inches(3.38), Inches(4.9)).text_frame
         tf.word_wrap = True
 
         p_t = tf.paragraphs[0]
@@ -879,16 +909,16 @@ def create_presentation():
             p_id.space_before = Pt(2)
 
     # =========================================================================
-    # SLIDE 16: Academic Contributions, Conclusion & Defense Q&A
+    # SLIDE 18: Academic Contributions, Conclusion & Defense Q&A
     # =========================================================================
-    s16 = prs.slides.add_slide(blank_layout)
-    add_bg(s16)
+    s18 = prs.slides.add_slide(blank_layout)
+    add_bg(s18)
 
     # Big Defense Conclusion Card
-    c_final = add_card(s16, Inches(1.0), Inches(0.8), Inches(11.333), Inches(5.9),
+    c_final = add_card(s18, Inches(1.0), Inches(0.8), Inches(11.333), Inches(5.9),
                        bg_color=RGBColor(24, 32, 47), border_color=ACCENT_INDIGO)
 
-    tf_fin = s16.shapes.add_textbox(Inches(1.5), Inches(1.2), Inches(10.333), Inches(5.2)).text_frame
+    tf_fin = s18.shapes.add_textbox(Inches(1.5), Inches(1.2), Inches(10.333), Inches(5.2)).text_frame
     tf_fin.word_wrap = True
 
     p = tf_fin.paragraphs[0]
@@ -934,10 +964,22 @@ def create_presentation():
     p_repo.font.color.rgb = ACCENT_BLUE
     p_repo.space_before = Pt(4)
 
-    # Save presentation
-    output_path = Path("A11yCC_Final_Project_Presentation.pptx")
-    prs.save(str(output_path))
-    print(f"Presentation successfully created at: {output_path.resolve()} ({output_path.stat().st_size} bytes)")
+    # Save presentation for Review 2 and Final Project
+    review2_path = Path("A11yCC_Project_Review_2_Presentation.pptx")
+    prs.save(str(review2_path))
+    print(f"Review 2 presentation created at: {review2_path.resolve()} ({review2_path.stat().st_size} bytes)")
+
+    final_path = Path("A11yCC_Final_Project_Presentation.pptx")
+    prs.save(str(final_path))
+    print(f"Final presentation created at: {final_path.resolve()} ({final_path.stat().st_size} bytes)")
+
+    # Copy to artifact dir
+    artifact_dir = Path(r"C:\Users\dhars\.gemini\antigravity\brain\f80eb206-15d1-4734-8e59-6b7ab94974f7")
+    if artifact_dir.exists():
+        import shutil
+        shutil.copy2(review2_path, artifact_dir / review2_path.name)
+        shutil.copy2(final_path, artifact_dir / final_path.name)
+        print(f"Copied presentations to artifact directory: {artifact_dir}")
 
 
 if __name__ == "__main__":
