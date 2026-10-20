@@ -158,6 +158,12 @@ class Element:
             return True
         return False
 
+    @property
+    def is_modal(self) -> bool:
+        """Indicates whether this container/group acts as an accessible modal dialog (aria-modal='true')."""
+        val = self.attrs.get("modal", False)
+        return val is True or str(val).lower() == "true"
+
 
 @dataclass
 class Program:

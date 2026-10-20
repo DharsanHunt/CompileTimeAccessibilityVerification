@@ -1,0 +1,8 @@
+[
+  {
+    "rule": "MissingLabel",
+    "wcag": "4.1.2",
+    "element_id": "cluster-action-unlabeled",
+    "severity": "error"
+  }
+]

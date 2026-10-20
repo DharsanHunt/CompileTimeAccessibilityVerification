@@ -25,13 +25,13 @@ class SymbolTable:
         self.element_list: List[Element] = []
         self.element_parents: Dict[str, Optional[str]] = {}  # element_id -> parent_element_id
 
-    def build_and_validate(self) -> None:
-        # 1. Validate NFR1 toggle limit (N <= 6)
-        if len(self.program.toggles) > 6:
-            pos = self.program.toggles[6].pos if len(self.program.toggles) > 6 else self.program.pos
+    def build_and_validate(self, max_toggles: int = 6) -> None:
+        # 1. Validate toggle limit (default N <= 6 for explicit bounded space, N <= 20 for symbolic)
+        if len(self.program.toggles) > max_toggles:
+            pos = self.program.toggles[max_toggles].pos if len(self.program.toggles) > max_toggles else self.program.pos
             raise SemanticError(
-                f"NFR1 Violation: Program declares {len(self.program.toggles)} toggles (max allowed is 6). "
-                f"Cap at N <= 6 to keep state-space enumeration bounded.",
+                f"NFR1 Violation: Program declares {len(self.program.toggles)} toggles (max allowed is {max_toggles}). "
+                f"Cap at N <= {max_toggles} to keep state-space enumeration bounded.",
                 pos,
             )
 

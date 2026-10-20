@@ -8,16 +8,32 @@ from .symbol_table import SymbolTable
 from .state_space import State, Transition, StateSpace
 from .diagnostics import Diagnostic, DiagnosticsReport
 from .profiles import AccessibilityProfile, get_profile
+from .symbolic import SymbolicAccessibilityAnalyzer
 
 
 class AccessibilityAnalyzer:
-    def __init__(self, program: Program, symbol_table: SymbolTable, profile: Optional[AccessibilityProfile] = None):
+    def __init__(
+        self,
+        program: Program,
+        symbol_table: SymbolTable,
+        profile: Optional[AccessibilityProfile] = None,
+        mode: str = "auto",
+    ):
         self.program = program
         self.symbols = symbol_table
         self.profile = profile or get_profile(program.profile)
-        self.state_space = StateSpace(program.toggles)
+        self.mode = mode
+        if mode == "symbolic" or (mode == "auto" and len(program.toggles) > 6):
+            self.state_space = None
+            self._symbolic_analyzer = SymbolicAccessibilityAnalyzer(program, symbol_table, self.profile)
+        else:
+            self.state_space = StateSpace(program.toggles)
+            self._symbolic_analyzer = None
 
     def analyze(self) -> DiagnosticsReport:
+        if self._symbolic_analyzer is not None:
+            return self._symbolic_analyzer.analyze()
+
         report = DiagnosticsReport()
 
         # Step 1: Precompute visibility per state

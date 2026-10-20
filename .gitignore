@@ -37,11 +37,25 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+*.bak
+*.tmp
+*.log
 
 # Documents / Presentations
 *.docx
 *.pptx
 *.ppt
+*.pdf
 
-# Screenshots
+# Screenshots & Archives
 presentation_screenshots/
+*.zip
+*.tar.gz
+
+# Parser / Test Caches
+parsetab.py
+lextab.py
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/

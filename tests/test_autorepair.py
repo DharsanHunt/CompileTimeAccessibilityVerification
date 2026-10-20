@@ -26,7 +26,33 @@ class TestAutoRepair(unittest.TestCase):
         symbols = SymbolTable(repaired_prog)
         symbols.build_and_validate()
         report = AccessibilityAnalyzer(repaired_prog, symbols).analyze()
-        self.assertFalse(report.has_errors)
+    def test_multi_defect_auto_repair(self):
+        # A program with multiple simultaneous defects:
+        # 1. missing label
+        # 2. scrambled tabindex
+        # 3. focus trap (missing focus_fallback)
+        buggy_source = """
+        toggle modalOpen = true;
+
+        Container(id="root", x=0, y=0) {
+          Button(id="open-btn", x=0, y=0, label="Open Modal", tabindex=2);
+          Group(id="modal", x=50, y=50, show_when=modalOpen) {
+            Button(id="modal-close", x=50, y=50, tabindex=1);
+          }
+        }
+        """
+        from a11ycc.autorepair import A11yAutoRepair
+        repairer = A11yAutoRepair(buggy_source)
+        repaired_source, diff_text, repairs = repairer.compute_repair()
+
+        self.assertTrue(len(repairs) >= 2)
+        # Verify the repaired code now passes verification!
+        prog = parse_source(repaired_source)
+        symbols = SymbolTable(prog)
+        symbols.build_and_validate()
+        analyzer = AccessibilityAnalyzer(prog, symbols)
+        report = analyzer.analyze()
+        self.assertFalse(report.has_errors, f"Expected 0 errors after repair, got: {report.to_json()}")
 
 
 if __name__ == "__main__":

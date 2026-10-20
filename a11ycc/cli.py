@@ -19,6 +19,7 @@ def compile_and_verify(
     source: str,
     filename: str = "<source>",
     profile_override: Optional[str] = None,
+    symbolic: bool = False,
 ) -> tuple[Optional[DiagnosticsReport], Optional[SymbolTable]]:
     report = DiagnosticsReport()
     try:
@@ -37,7 +38,8 @@ def compile_and_verify(
 
     try:
         symbols = SymbolTable(program)
-        symbols.build_and_validate()
+        max_t = 20 if symbolic or len(program.toggles) > 6 else 6
+        symbols.build_and_validate(max_toggles=max_t)
     except SemanticError as se:
         report.add(Diagnostic(
             rule="SemanticError",
@@ -51,7 +53,12 @@ def compile_and_verify(
         return report, None
 
     profile = get_profile(profile_override or program.profile)
-    analyzer = AccessibilityAnalyzer(program, symbols, profile)
+    analyzer = AccessibilityAnalyzer(
+        program,
+        symbols,
+        profile,
+        mode="symbolic" if symbolic else "auto",
+    )
     analysis_report = analyzer.analyze()
     for d in analysis_report.diagnostics:
         report.add(d)
@@ -71,6 +78,7 @@ def cli_main(args: Optional[list[str]] = None) -> int:
     check_parser = subparsers.add_parser("check", help="Verify accessibility of a DSL file")
     check_parser.add_argument("file", type=str, help="Path to .dsl source file")
     check_parser.add_argument("--json", action="store_true", help="Output diagnostics in JSON format")
+    check_parser.add_argument("--symbolic", action="store_true", help="Use ROBDD symbolic model checker for large state spaces (k >= 7)")
     check_parser.add_argument("--profile", type=str, default=None, help="Accessibility profile (standard, screen-reader-first, switch-access-first)")
 
     # Command: emit
@@ -83,6 +91,11 @@ def cli_main(args: Optional[list[str]] = None) -> int:
     repair_parser.add_argument("file", type=str, help="Path to .dsl source file")
     repair_parser.add_argument("--diff", action="store_true", help="Print unified diff to terminal")
     repair_parser.add_argument("-o", "--output", type=str, default=None, help="Write repaired DSL to file")
+
+    # Command: transpile
+    transpile_parser = subparsers.add_parser("transpile", help="Transpile React JSX/TSX component to A11yCC DSL")
+    transpile_parser.add_argument("file", type=str, help="Path to .jsx/.tsx source file")
+    transpile_parser.add_argument("-o", "--output", type=str, default=None, help="Output .dsl file path")
 
     # Command: serve
     serve_parser = subparsers.add_parser("serve", help="Launch interactive A11yCC Lab studio in browser")
@@ -119,7 +132,12 @@ def cli_main(args: Optional[list[str]] = None) -> int:
     source = file_path.read_text(encoding="utf-8")
 
     if parsed_args.command == "check":
-        report, _ = compile_and_verify(source, filename=str(file_path), profile_override=parsed_args.profile)
+        report, _ = compile_and_verify(
+            source,
+            filename=str(file_path),
+            profile_override=parsed_args.profile,
+            symbolic=parsed_args.symbolic,
+        )
         if parsed_args.json:
             print(report.to_json())
         else:
@@ -137,6 +155,7 @@ def cli_main(args: Optional[list[str]] = None) -> int:
         html_out = generator.generate()
         if parsed_args.output:
             out_path = Path(parsed_args.output)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
             out_path.write_text(html_out, encoding="utf-8")
             print(f"Accessible HTML emitted successfully to: {out_path}")
         else:
@@ -145,17 +164,23 @@ def cli_main(args: Optional[list[str]] = None) -> int:
 
     elif parsed_args.command == "repair":
         try:
-            repairer = TabOrderAutoRepair(source)
-            repaired_source, diff_text, tab_map = repairer.compute_repair()
+            from .autorepair import A11yAutoRepair
+            repairer = A11yAutoRepair(source)
+            repaired_source, diff_text, repairs = repairer.compute_repair()
             if parsed_args.diff:
                 if diff_text:
-                    print("--- Tab Order Auto-Repair Diff ---")
+                    print("--- A11yCC Multi-Defect Auto-Repair Diff ---")
                     print(diff_text)
+                    if repairs:
+                        print("\nRepairs Applied:")
+                        for r in repairs:
+                            print(f"  • {r}")
                 else:
-                    print("No tab order repair needed. All tab indices are already aligned with visual layout.")
+                    print("No repairs needed. Program satisfies all accessibility checks.")
 
             if parsed_args.output:
                 out_path = Path(parsed_args.output)
+                out_path.parent.mkdir(parents=True, exist_ok=True)
                 out_path.write_text(repaired_source, encoding="utf-8")
                 print(f"Repaired DSL written to: {out_path}")
             elif not parsed_args.diff:
@@ -163,6 +188,22 @@ def cli_main(args: Optional[list[str]] = None) -> int:
             return 0
         except Exception as e:
             print(f"Auto-repair failed: {e}", file=sys.stderr)
+            return 1
+
+    elif parsed_args.command == "transpile":
+        try:
+            from .transpiler import transpile_jsx_to_dsl
+            dsl_out = transpile_jsx_to_dsl(source)
+            if parsed_args.output:
+                out_path = Path(parsed_args.output)
+                out_path.parent.mkdir(parents=True, exist_ok=True)
+                out_path.write_text(dsl_out, encoding="utf-8")
+                print(f"Transpiled A11yCC DSL written to: {out_path}")
+            else:
+                print(dsl_out)
+            return 0
+        except Exception as e:
+            print(f"Transpilation failed: {e}", file=sys.stderr)
             return 1
 
     return 0
