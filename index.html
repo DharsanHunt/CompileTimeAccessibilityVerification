@@ -620,7 +620,7 @@
           </select>
 
           <!-- React JSX Transpiler Import Button -->
-          <button onclick="promptTranspileJsx()" title="Paste React JSX/TSX component code to transpile to A11yCC DSL" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition cursor-pointer">
+          <button onclick="openReactJsxModal()" title="Paste React JSX/TSX component code to transpile to A11yCC DSL" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition cursor-pointer">
             <span class="text-sm">⚛️</span>
             <span>Import React JSX</span>
           </button>
@@ -844,6 +844,77 @@
 
       </div>
 
+    </div>
+
+    <!-- React JSX / TSX AST Frontend Importer Modal Dialog -->
+    <div id="reactJsxModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm transition-all" role="dialog" aria-modal="true" aria-labelledby="jsxModalTitle">
+      <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">⚛️</span>
+            <div>
+              <h3 id="jsxModalTitle" class="text-base font-bold text-slate-900">Import & Transpile React JSX / TSX Component</h3>
+              <p class="text-xs text-slate-500">Paste your multi-line React component code below. A11yCC will extract useState hooks, conditional UI, and ARIA attributes.</p>
+            </div>
+          </div>
+          <button onclick="closeReactJsxModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 text-sm font-bold transition">✕</button>
+        </div>
+
+        <!-- Presets / Quick Paste Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-2 px-6 py-2.5 bg-indigo-50/50 border-b border-indigo-100 text-xs">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-semibold text-slate-700">Quick Samples:</span>
+            <button onclick="loadSampleJsx('clean_modal')" class="px-2.5 py-1 rounded-md bg-white border border-indigo-200 hover:bg-indigo-600 hover:text-white text-indigo-700 font-medium transition shadow-xs">
+              ✨ Accessible Dialog (Clean)
+            </button>
+            <button onclick="loadSampleJsx('buggy_trap')" class="px-2.5 py-1 rounded-md bg-white border border-rose-200 hover:bg-rose-600 hover:text-white text-rose-700 font-medium transition shadow-xs">
+              ⚠️ Vanishing Trap Dialog (Buggy)
+            </button>
+            <button onclick="loadSampleJsx('counter')" class="px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-700 hover:text-white text-slate-700 font-medium transition shadow-xs">
+              ⚙️ Multi-Toggle Panel
+            </button>
+          </div>
+          <button onclick="document.getElementById('jsxInputArea').value = ''; document.getElementById('jsxInputArea').focus();" class="text-slate-500 hover:text-rose-600 font-semibold px-2 py-1 rounded hover:bg-white transition">
+            Clear
+          </button>
+        </div>
+
+        <!-- Textarea Body -->
+        <div class="p-6 flex-1 overflow-y-auto space-y-3 bg-slate-50/30">
+          <div class="flex items-center justify-between">
+            <label for="jsxInputArea" class="text-xs font-bold text-slate-700">React Component Source Code (JSX / TSX):</label>
+            <span class="text-[11px] text-slate-500">Paste (Ctrl+V) multi-line component code freely</span>
+          </div>
+          <textarea id="jsxInputArea" rows="13" spellcheck="false" placeholder="export function MyComponent() {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div>
+      <button id='open-btn' onClick={() => setIsOpen(true)}>Open Dialog</button>
+      {isOpen && (
+        <div role='dialog' aria-modal='true' data-focus-fallback='open-btn'>
+          <p>Dialog Content</p>
+          <button id='close-btn' onClick={() => setIsOpen(false)} data-focus-fallback='open-btn'>Close</button>
+        </div>
+      )}
+    </div>
+  );
+}" class="w-full font-mono-code text-xs bg-slate-950 text-emerald-400 p-4 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner resize-y leading-relaxed"></textarea>
+          
+          <div id="jsxTranspileError" class="hidden p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-mono-code"></div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-white">
+          <span class="text-[11px] text-slate-500 hidden sm:inline">Converts <code class="bg-slate-100 text-slate-800 px-1 py-0.5 rounded font-mono-code">useState</code> to hypercube toggles & maps conditional trees.</span>
+          <div class="flex items-center gap-3 ml-auto">
+            <button onclick="closeReactJsxModal()" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 transition">Cancel</button>
+            <button onclick="applyReactJsxTranspile()" class="px-5 py-2 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-sm flex items-center gap-2 active:scale-95">
+              <span>⚡ Transpile & Verify</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -3390,16 +3461,120 @@ Container(id="my-app", x=0, y=0) {
       let code = jsx.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
       const toggles = {};
 
+      // Match useState: const [isOpen, setIsOpen] = useState(false)
       const stateMatches = code.matchAll(/const\s+\[\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*set[a-zA-Z0-9_]+\s*\]\s*=\s*useState\s*\(\s*(true|false)\s*\)/g);
       for (const m of stateMatches) {
         toggles[m[1]] = m[2] === 'true';
       }
 
+      // Match conditional vars {isOpen &&
       const condVars = code.matchAll(/\{([a-zA-Z_][a-zA-Z0-9_]*)\s*&&/g);
       for (const m of condVars) {
         if (toggles[m[1]] === undefined) toggles[m[1]] = false;
       }
 
+      function parseAttrs(attrStr) {
+        const attrs = {};
+        const attrMatches = attrStr.matchAll(/([a-zA-Z0-9_-]+)=(?:"([^"]*)"|'([^']*)'|\{([^}]+)\})/g);
+        for (const m of attrMatches) {
+          const key = m[1];
+          const val = m[2] !== undefined ? m[2] : (m[3] !== undefined ? m[3] : m[4]);
+          attrs[key] = val || '';
+        }
+        return attrs;
+      }
+
+      function extractText(str) {
+        return str.replace(/<[^>]+>/g, '').replace(/\{[^}]+\}/g, '').replace(/\s+/g, ' ').trim();
+      }
+
+      function parseElementsOnly(frag, condName) {
+        const result = [];
+        const tagRegex = /<([a-zA-Z0-9]+)([^>]*?)(?:\/>|>([\s\S]*?)<\/\1>)/gi;
+        let m;
+
+        while ((m = tagRegex.exec(frag)) !== null) {
+          const rawTag = m[1].toLowerCase();
+          const attrStr = m[2] || '';
+          const inner = m[3] || '';
+          const attrs = parseAttrs(attrStr);
+
+          const isModal = attrs['role'] === 'dialog' || attrs['aria-modal'] === 'true' || rawTag === 'dialog' || rawTag === 'modal';
+          const fallback = attrs['data-focus-fallback'] || attrs['focus_fallback'] || (attrStr.includes('false') && attrStr.includes('open') ? 'open-btn' : null);
+          const tabIndex = attrs['tabindex'] || attrs['tabIndex'];
+
+          if (rawTag === 'div' || rawTag === 'section' || rawTag === 'dialog' || rawTag === 'modal') {
+            const id = attrs['id'] || ('group_' + Math.floor(Math.random() * 900 + 100));
+            const childItems = inner ? parseSnippet(inner, null) : [];
+            result.push({
+              kind: 'Group',
+              id: id,
+              cond: condName,
+              isModal: isModal,
+              fallback: fallback,
+              tabindex: tabIndex,
+              children: childItems
+            });
+          } else if (rawTag === 'button' || rawTag === 'a') {
+            const id = attrs['id'] || ('btn_' + Math.floor(Math.random() * 900 + 100));
+            const label = attrs['aria-label'] || attrs['label'] || extractText(inner) || 'Button Action';
+            result.push({
+              kind: 'Button',
+              id: id,
+              label: label,
+              cond: condName,
+              fallback: fallback,
+              tabindex: tabIndex
+            });
+          } else if (rawTag === 'input' || rawTag === 'textarea' || rawTag === 'select') {
+            const id = attrs['id'] || ('input_' + Math.floor(Math.random() * 900 + 100));
+            const label = attrs['aria-label'] || attrs['placeholder'] || attrs['label'] || 'Input Field';
+            result.push({
+              kind: 'Input',
+              id: id,
+              label: label,
+              cond: condName,
+              tabindex: tabIndex
+            });
+          } else if (['p', 'span', 'h1', 'h2', 'h3', 'h4', 'label'].includes(rawTag)) {
+            const id = attrs['id'] || ('text_' + Math.floor(Math.random() * 900 + 100));
+            const label = extractText(inner) || attrs['label'] || 'Text Content';
+            result.push({
+              kind: 'Text',
+              id: id,
+              label: label,
+              cond: condName
+            });
+          }
+        }
+        return result;
+      }
+
+      function parseSnippet(fragment, condName) {
+        const items = [];
+        const condPattern = /\{([a-zA-Z_][a-zA-Z0-9_]*)\s*&&\s*(?:\(?\s*)?(<[a-zA-Z0-9]+[^>]*>[\s\S]*?<\/[a-zA-Z0-9]+>|<[a-zA-Z0-9]+[^>]*\/>)(?:\s*\)?)?\}/g;
+        let lastIdx = 0;
+        let match;
+
+        while ((match = condPattern.exec(fragment)) !== null) {
+          const before = fragment.substring(lastIdx, match.index).trim();
+          if (before) {
+            items.push(...parseElementsOnly(before, condName));
+          }
+          const cVar = match[1];
+          toggles[cVar] = toggles[cVar] || false;
+          items.push(...parseElementsOnly(match[2], cVar));
+          lastIdx = match.index + match[0].length;
+        }
+
+        const remaining = fragment.substring(lastIdx).trim();
+        if (remaining) {
+          items.push(...parseElementsOnly(remaining, condName));
+        }
+        return items;
+      }
+
+      const elements = parseSnippet(code, null);
       const dslLines = [];
       for (const name of Object.keys(toggles).sort()) {
         dslLines.push(`toggle ${name} = ${toggles[name] ? 'true' : 'false'};`);
@@ -3407,59 +3582,166 @@ Container(id="my-app", x=0, y=0) {
       if (dslLines.length > 0) dslLines.push('');
 
       dslLines.push('Container(id="react-root", x=0, y=0) {');
-      let yCursor = 0;
 
-      const buttonMatches = code.matchAll(/<button[^>]*?(?:id=["']([^"']+)["'])?[^>]*?>([\s\S]*?)<\/button>/gi);
-      for (const b of buttonMatches) {
-        const id = b[1] || `btn_${++yCursor}`;
-        let label = b[2].replace(/<[^>]+>/g, '').replace(/\{[^}]+\}/g, '').trim() || 'Button Action';
-        let extra = '';
-        if (/onClick\s*=\s*\{[^}]*false[^}]*\}/i.test(b[0])) {
-          extra += ', focus_fallback="open-btn"';
+      let currentY = 0;
+      function renderNode(node, indent) {
+        const pad = '  '.repeat(indent);
+        const parts = [`id="${node.id}"`, `x=0`, `y=${currentY}`];
+        if (node.label) parts.push(`label="${node.label}"`);
+        if (node.tabindex) parts.push(`tabindex=${node.tabindex}`);
+        if (node.isModal) parts.push(`modal=true`);
+        if (node.cond) parts.push(`show_when=${node.cond}`);
+        if (node.fallback) parts.push(`focus_fallback="${node.fallback}"`);
+
+        const attrStr = parts.join(', ');
+        currentY += 40;
+
+        if (node.kind === 'Group') {
+          dslLines.push(`${pad}Group(${attrStr}) {`);
+          if (node.children && node.children.length > 0) {
+            for (const child of node.children) {
+              renderNode(child, indent + 1);
+            }
+          }
+          dslLines.push(`${pad}}`);
+        } else {
+          dslLines.push(`${pad}${node.kind}(${attrStr});`);
         }
-        dslLines.push(`  Button(id="${id}", x=0, y=${yCursor * 40}, label="${label}"${extra});`);
-        yCursor++;
       }
 
-      const inputMatches = code.matchAll(/<input[^>]*?(?:id=["']([^"']+)["'])?[^>]*?(?:placeholder=["']([^"']+)["'])?[^>]*?\/?>/gi);
-      for (const inp of inputMatches) {
-        const id = inp[1] || `input_${++yCursor}`;
-        const label = inp[2] || 'Input Field';
-        dslLines.push(`  Input(id="${id}", x=0, y=${yCursor * 40}, label="${label}");`);
-        yCursor++;
+      for (const el of elements) {
+        renderNode(el, 1);
       }
 
       dslLines.push('}');
       return dslLines.join('\n');
     }
 
-    function promptTranspileJsx() {
-      const sample = `export function QuickAlert() {
+    function openReactJsxModal() {
+      const m = document.getElementById('reactJsxModal');
+      if (m) {
+        m.classList.remove('hidden');
+        const area = document.getElementById('jsxInputArea');
+        if (area && !area.value.trim()) {
+          loadSampleJsx('clean_modal');
+        }
+        setTimeout(() => { if (area) area.focus(); }, 50);
+      }
+    }
+
+    function closeReactJsxModal() {
+      const m = document.getElementById('reactJsxModal');
+      if (m) m.classList.add('hidden');
+      const err = document.getElementById('jsxTranspileError');
+      if (err) err.classList.add('hidden');
+    }
+
+    function loadSampleJsx(sampleType) {
+      const area = document.getElementById('jsxInputArea');
+      if (!area) return;
+
+      if (sampleType === 'clean_modal') {
+        area.value = `export function AccessibleModal() {
   const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div>
-      <button id="open-btn" onClick={() => setIsOpen(true)}>Open Alert</button>
+      <button id="open-btn" onClick={() => setIsOpen(true)}>
+        Open Settings Dialog
+      </button>
+
       {isOpen && (
-        <div id="alert-modal" role="dialog" aria-modal="true" data-focus-fallback="open-btn">
-          <button id="close-btn" onClick={() => setIsOpen(false)} data-focus-fallback="open-btn">Dismiss</button>
-          <p id="msg-text">Alert: Review 3 Final Project Deliverable Ready.</p>
+        <div id="settings-dialog" role="dialog" aria-modal="true" data-focus-fallback="open-btn">
+          <h2 id="dialog-title">Account Security Settings</h2>
+          <input id="email-field" placeholder="User Email" />
+          <button id="save-btn" onClick={() => setIsOpen(false)} data-focus-fallback="open-btn">
+            Save Changes
+          </button>
+          <button id="close-btn" onClick={() => setIsOpen(false)} data-focus-fallback="open-btn">
+            Cancel & Close
+          </button>
         </div>
       )}
     </div>
   );
 }`;
-      const code = prompt("Paste your React JSX / TSX Component Code below:", sample);
-      if (code && code.trim()) {
-        try {
-          const transpiled = transpileJsxToDsl(code);
-          const editor = document.getElementById('dslCustomEditor');
+      } else if (sampleType === 'buggy_trap') {
+        area.value = `export function VanishingTrapDialog() {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <div>
+      <button id="open-btn" onClick={() => setIsOpen(true)}>
+        Open Dialog
+      </button>
+
+      {isOpen && (
+        <div id="buggy-modal" role="dialog" aria-modal="true">
+          <p id="modal-desc">This dialog has NO focus fallback! Closing it traps focus in root body!</p>
+          <button id="trap-close-btn" onClick={() => setIsOpen(false)}>
+            Close Modal (Bug: No Fallback)
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}`;
+      } else if (sampleType === 'counter') {
+        area.value = `export function MultiTogglePanel() {
+  const [showFilters, setShowFilters] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  return (
+    <div>
+      <button id="btn-filters" onClick={() => setShowFilters(!showFilters)}>
+        Toggle Filters
+      </button>
+
+      {showFilters && (
+        <div id="filter-group">
+          <button id="btn-advanced" onClick={() => setShowAdvanced(!showAdvanced)}>
+            Advanced Settings
+          </button>
+          {showAdvanced && (
+            <div id="advanced-group">
+              <input id="input-api-key" placeholder="API Key" />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}`;
+      }
+      area.focus();
+    }
+
+    function applyReactJsxTranspile() {
+      const area = document.getElementById('jsxInputArea');
+      const errBox = document.getElementById('jsxTranspileError');
+      if (!area || !area.value.trim()) {
+        if (errBox) {
+          errBox.textContent = "Please paste or type a React JSX/TSX component first.";
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      try {
+        const transpiled = transpileJsxToDsl(area.value);
+        const editor = document.getElementById('dslCustomEditor');
+        if (editor) {
           editor.value = transpiled;
           document.getElementById('editorFileName').innerText = "imported_component.dsl";
           updateLineCount();
           compileCustomEditorCode();
-          speakScreenReader("React JSX component successfully transpiled and verified.");
-        } catch (e) {
-          alert("JSX Transpilation failed: " + e.message);
+        }
+        closeReactJsxModal();
+        speakScreenReader("React JSX component successfully transpiled and verified.");
+      } catch (e) {
+        if (errBox) {
+          errBox.textContent = "Transpilation Error: " + e.message;
+          errBox.classList.remove('hidden');
         }
       }
     }
