@@ -3458,16 +3458,17 @@ Container(id="my-app", x=0, y=0) {
 
     function transpileJsxToDsl(jsx) {
       if (!jsx || !jsx.trim()) return '';
+      // Strip comments
       let code = jsx.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
       const toggles = {};
 
-      // Match useState: const [isOpen, setIsOpen] = useState(false)
+      // 1. Detect useState hooks: const [isOpen, setIsOpen] = useState(false)
       const stateMatches = code.matchAll(/const\s+\[\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*set[a-zA-Z0-9_]+\s*\]\s*=\s*useState\s*\(\s*(true|false)\s*\)/g);
       for (const m of stateMatches) {
         toggles[m[1]] = m[2] === 'true';
       }
 
-      // Match conditional vars {isOpen &&
+      // 2. Detect conditional variables {isOpen &&
       const condVars = code.matchAll(/\{([a-zA-Z_][a-zA-Z0-9_]*)\s*&&/g);
       for (const m of condVars) {
         if (toggles[m[1]] === undefined) toggles[m[1]] = false;
@@ -3475,11 +3476,51 @@ Container(id="my-app", x=0, y=0) {
 
       function parseAttrs(attrStr) {
         const attrs = {};
-        const attrMatches = attrStr.matchAll(/([a-zA-Z0-9_-]+)=(?:"([^"]*)"|'([^']*)'|\{([^}]+)\})/g);
-        for (const m of attrMatches) {
-          const key = m[1];
-          const val = m[2] !== undefined ? m[2] : (m[3] !== undefined ? m[3] : m[4]);
-          attrs[key] = val || '';
+        let i = 0;
+        const n = attrStr.length;
+
+        while (i < n) {
+          while (i < n && /\s/.test(attrStr[i])) i++;
+          if (i >= n) break;
+
+          const nameMatch = attrStr.slice(i).match(/^([a-zA-Z0-9_-]+)/);
+          if (!nameMatch) { i++; continue; }
+          const attrName = nameMatch[1];
+          i += attrName.length;
+
+          while (i < n && /\s/.test(attrStr[i])) i++;
+          if (i < n && attrStr[i] === '=') {
+            i++; // skip '='
+            while (i < n && /\s/.test(attrStr[i])) i++;
+            if (i < n) {
+              const quote = attrStr[i];
+              if (quote === '"' || quote === "'" || quote === '`') {
+                i++;
+                const valStart = i;
+                while (i < n && attrStr[i] !== quote) i++;
+                attrs[attrName] = attrStr.slice(valStart, i);
+                if (i < n) i++;
+              } else if (quote === '{') {
+                i++;
+                let depth = 1;
+                const valStart = i;
+                while (i < n && depth > 0) {
+                  if (attrStr[i] === '{') depth++;
+                  else if (attrStr[i] === '}') depth--;
+                  i++;
+                }
+                attrs[attrName] = attrStr.slice(valStart, i - 1).trim();
+              } else {
+                const valMatch = attrStr.slice(i).match(/^([^\s>]+)/);
+                if (valMatch) {
+                  attrs[attrName] = valMatch[1];
+                  i += valMatch[1].length;
+                }
+              }
+            }
+          } else {
+            attrs[attrName] = 'true';
+          }
         }
         return attrs;
       }
@@ -3488,93 +3529,175 @@ Container(id="my-app", x=0, y=0) {
         return str.replace(/<[^>]+>/g, '').replace(/\{[^}]+\}/g, '').replace(/\s+/g, ' ').trim();
       }
 
-      function parseElementsOnly(frag, condName) {
-        const result = [];
-        const tagRegex = /<([a-zA-Z0-9]+)([^>]*?)(?:\/>|>([\s\S]*?)<\/\1>)/gi;
-        let m;
+      function parseElements(fragment, condName) {
+        const nodes = [];
+        let i = 0;
+        const n = fragment.length;
 
-        while ((m = tagRegex.exec(frag)) !== null) {
-          const rawTag = m[1].toLowerCase();
-          const attrStr = m[2] || '';
-          const inner = m[3] || '';
+        while (i < n) {
+          const startTagIdx = fragment.indexOf('<', i);
+          if (startTagIdx === -1) break;
+
+          // Skip closing tags at top level
+          if (startTagIdx + 1 < n && fragment[startTagIdx + 1] === '/') {
+            const closeBracket = fragment.indexOf('>', startTagIdx);
+            if (closeBracket === -1) break;
+            i = closeBracket + 1;
+            continue;
+          }
+
+          const tagNameMatch = fragment.slice(startTagIdx).match(/^<([a-zA-Z0-9]+)/);
+          if (!tagNameMatch) {
+            i = startTagIdx + 1;
+            continue;
+          }
+
+          const tagName = tagNameMatch[1].toLowerCase();
+          const tagNameLen = tagNameMatch[0].length;
+
+          // Scan attributes with brace and quote tracking
+          const attrStart = startTagIdx + tagNameLen;
+          let j = attrStart;
+          let braceDepth = 0;
+          let inQuote = null;
+          let isSelfClosing = false;
+          let tagEnd = -1;
+
+          while (j < n) {
+            const ch = fragment[j];
+            if (inQuote) {
+              if (ch === inQuote) inQuote = null;
+            } else if (ch === '"' || ch === "'" || ch === '`') {
+              inQuote = ch;
+            } else if (ch === '{') {
+              braceDepth++;
+            } else if (ch === '}') {
+              braceDepth = Math.max(0, braceDepth - 1);
+            } else if (ch === '>' && braceDepth === 0 && !inQuote) {
+              if (j > 0 && fragment[j - 1] === '/') {
+                isSelfClosing = true;
+              }
+              tagEnd = j;
+              break;
+            }
+            j++;
+          }
+
+          if (tagEnd === -1) break;
+
+          const attrStr = fragment.slice(attrStart, tagEnd - (isSelfClosing ? 1 : 0));
           const attrs = parseAttrs(attrStr);
 
-          const isModal = attrs['role'] === 'dialog' || attrs['aria-modal'] === 'true' || rawTag === 'dialog' || rawTag === 'modal';
-          const fallback = attrs['data-focus-fallback'] || attrs['focus_fallback'] || (attrStr.includes('false') && attrStr.includes('open') ? 'open-btn' : null);
+          const elemId = attrs['id'] || (tagName + '_' + Math.floor(Math.random() * 900 + 100));
+          const isModal = attrs['role'] === 'dialog' || attrs['aria-modal'] === 'true' || tagName === 'dialog' || tagName === 'modal';
+          const fallback = attrs['data-focus-fallback'] || attrs['focus_fallback'] || null;
           const tabIndex = attrs['tabindex'] || attrs['tabIndex'];
 
-          if (rawTag === 'div' || rawTag === 'section' || rawTag === 'dialog' || rawTag === 'modal') {
-            const id = attrs['id'] || ('group_' + Math.floor(Math.random() * 900 + 100));
-            const childItems = inner ? parseSnippet(inner, null) : [];
-            result.push({
-              kind: 'Group',
-              id: id,
-              cond: condName,
-              isModal: isModal,
-              fallback: fallback,
-              tabindex: tabIndex,
-              children: childItems
-            });
-          } else if (rawTag === 'button' || rawTag === 'a') {
-            const id = attrs['id'] || ('btn_' + Math.floor(Math.random() * 900 + 100));
-            const label = attrs['aria-label'] || attrs['label'] || extractText(inner) || 'Button Action';
-            result.push({
-              kind: 'Button',
-              id: id,
-              label: label,
-              cond: condName,
-              fallback: fallback,
-              tabindex: tabIndex
-            });
-          } else if (rawTag === 'input' || rawTag === 'textarea' || rawTag === 'select') {
-            const id = attrs['id'] || ('input_' + Math.floor(Math.random() * 900 + 100));
-            const label = attrs['aria-label'] || attrs['placeholder'] || attrs['label'] || 'Input Field';
-            result.push({
-              kind: 'Input',
-              id: id,
-              label: label,
-              cond: condName,
-              tabindex: tabIndex
-            });
-          } else if (['p', 'span', 'h1', 'h2', 'h3', 'h4', 'label'].includes(rawTag)) {
-            const id = attrs['id'] || ('text_' + Math.floor(Math.random() * 900 + 100));
-            const label = extractText(inner) || attrs['label'] || 'Text Content';
-            result.push({
-              kind: 'Text',
-              id: id,
-              label: label,
-              cond: condName
-            });
+          let nodeKind = 'Button';
+          if (tagName === 'button' || tagName === 'a') {
+            nodeKind = 'Button';
+          } else if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
+            nodeKind = 'Input';
+          } else if (['p', 'span', 'h1', 'h2', 'h3', 'h4', 'label'].includes(tagName)) {
+            nodeKind = 'Text';
+          } else if (['div', 'section', 'article', 'aside', 'nav', 'dialog', 'modal'].includes(tagName)) {
+            nodeKind = 'Group';
           }
+
+          let children = [];
+          let innerContent = '';
+
+          if (isSelfClosing) {
+            i = tagEnd + 1;
+          } else {
+            const closeTag = '</' + tagName + '>';
+            const openPrefix = '<' + tagName;
+            let k = tagEnd + 1;
+            let depth = 1;
+            const contentStart = k;
+            let contentEnd = k;
+
+            while (k < n && depth > 0) {
+              const nextOpen = fragment.indexOf(openPrefix, k);
+              const nextClose = fragment.indexOf(closeTag, k);
+
+              if (nextClose === -1) {
+                contentEnd = n;
+                i = n;
+                break;
+              }
+
+              if (nextOpen !== -1 && nextOpen < nextClose) {
+                const afterCh = fragment[nextOpen + openPrefix.length];
+                if ([' ', '>', '/', '\t', '\n'].includes(afterCh)) {
+                  depth++;
+                }
+                k = nextOpen + openPrefix.length;
+              } else {
+                depth--;
+                if (depth === 0) {
+                  contentEnd = nextClose;
+                  i = nextClose + closeTag.length;
+                } else {
+                  k = nextClose + closeTag.length;
+                }
+              }
+            }
+
+            innerContent = fragment.slice(contentStart, contentEnd).trim();
+            if (nodeKind === 'Group' && innerContent) {
+              children = parseBody(innerContent);
+            }
+          }
+
+          let label = '';
+          if (nodeKind === 'Group') {
+            label = attrs['aria-label'] || attrs['label'] || '';
+          } else {
+            label = attrs['aria-label'] || attrs['label'] || attrs['placeholder'] || extractText(innerContent);
+          }
+
+          nodes.push({
+            kind: nodeKind,
+            id: elemId,
+            label: label || (nodeKind === 'Button' ? 'Button Action' : (nodeKind === 'Input' ? 'Input Field' : '')),
+            cond: condName,
+            isModal: isModal,
+            fallback: fallback,
+            tabindex: tabIndex,
+            children: children
+          });
         }
-        return result;
+
+        return nodes;
       }
 
-      function parseSnippet(fragment, condName) {
-        const items = [];
-        const condPattern = /\{([a-zA-Z_][a-zA-Z0-9_]*)\s*&&\s*(?:\(?\s*)?(<[a-zA-Z0-9]+[^>]*>[\s\S]*?<\/[a-zA-Z0-9]+>|<[a-zA-Z0-9]+[^>]*\/>)(?:\s*\)?)?\}/g;
+      function parseBody(jsxBody) {
+        const nodes = [];
+        // Tokenize conditional blocks {cond && (<...>)}
+        const condPattern = /\{([a-zA-Z_][a-zA-Z0-9_]*)\s*&&\s*(?:\(?\s*)?(<[a-zA-Z0-9]+[\s\S]*?>[\s\S]*?<\/[a-zA-Z0-9]+>|<[a-zA-Z0-9]+[\s\S]*?\/>)(?:\s*\)?)?\}/g;
         let lastIdx = 0;
         let match;
 
-        while ((match = condPattern.exec(fragment)) !== null) {
-          const before = fragment.substring(lastIdx, match.index).trim();
+        while ((match = condPattern.exec(jsxBody)) !== null) {
+          const before = jsxBody.slice(lastIdx, match.index).trim();
           if (before) {
-            items.push(...parseElementsOnly(before, condName));
+            nodes.push(...parseElements(before, null));
           }
           const cVar = match[1];
           toggles[cVar] = toggles[cVar] || false;
-          items.push(...parseElementsOnly(match[2], cVar));
+          nodes.push(...parseElements(match[2], cVar));
           lastIdx = match.index + match[0].length;
         }
 
-        const remaining = fragment.substring(lastIdx).trim();
+        const remaining = jsxBody.slice(lastIdx).trim();
         if (remaining) {
-          items.push(...parseElementsOnly(remaining, condName));
+          nodes.push(...parseElements(remaining, null));
         }
-        return items;
+        return nodes;
       }
 
-      const elements = parseSnippet(code, null);
+      const rootNodes = parseBody(code);
       const dslLines = [];
       for (const name of Object.keys(toggles).sort()) {
         dslLines.push(`toggle ${name} = ${toggles[name] ? 'true' : 'false'};`);
@@ -3609,7 +3732,7 @@ Container(id="my-app", x=0, y=0) {
         }
       }
 
-      for (const el of elements) {
+      for (const el of rootNodes) {
         renderNode(el, 1);
       }
 
