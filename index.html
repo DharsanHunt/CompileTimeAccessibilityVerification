@@ -865,19 +865,27 @@
         <div class="flex flex-wrap items-center justify-between gap-2 px-6 py-2.5 bg-indigo-50/50 border-b border-indigo-100 text-xs">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="font-semibold text-slate-700">Quick Samples:</span>
-            <button onclick="loadSampleJsx('clean_modal')" class="px-2.5 py-1 rounded-md bg-white border border-indigo-200 hover:bg-indigo-600 hover:text-white text-indigo-700 font-medium transition shadow-xs">
+            <button onclick="loadSampleJsx('quick_alert')" class="px-2.5 py-1 rounded-md bg-white border border-emerald-300 hover:bg-emerald-600 hover:text-white text-emerald-800 font-bold transition shadow-xs cursor-pointer">
+              ⚡ QuickAlert (Review 3)
+            </button>
+            <button onclick="loadSampleJsx('clean_modal')" class="px-2.5 py-1 rounded-md bg-white border border-indigo-200 hover:bg-indigo-600 hover:text-white text-indigo-700 font-medium transition shadow-xs cursor-pointer">
               ✨ Accessible Dialog (Clean)
             </button>
-            <button onclick="loadSampleJsx('buggy_trap')" class="px-2.5 py-1 rounded-md bg-white border border-rose-200 hover:bg-rose-600 hover:text-white text-rose-700 font-medium transition shadow-xs">
-              ⚠️ Vanishing Trap Dialog (Buggy)
+            <button onclick="loadSampleJsx('buggy_trap')" class="px-2.5 py-1 rounded-md bg-white border border-rose-200 hover:bg-rose-600 hover:text-white text-rose-700 font-medium transition shadow-xs cursor-pointer">
+              ⚠️ Vanishing Trap (Buggy)
             </button>
-            <button onclick="loadSampleJsx('counter')" class="px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-700 hover:text-white text-slate-700 font-medium transition shadow-xs">
+            <button onclick="loadSampleJsx('counter')" class="px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-700 hover:text-white text-slate-700 font-medium transition shadow-xs cursor-pointer">
               ⚙️ Multi-Toggle Panel
             </button>
           </div>
-          <button onclick="document.getElementById('jsxInputArea').value = ''; document.getElementById('jsxInputArea').focus();" class="text-slate-500 hover:text-rose-600 font-semibold px-2 py-1 rounded hover:bg-white transition">
-            Clear
-          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="pasteFromClipboardToJsx()" class="px-3 py-1 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95">
+              <span>📋 Paste from Clipboard</span>
+            </button>
+            <button onclick="document.getElementById('jsxInputArea').value = ''; document.getElementById('jsxInputArea').focus();" class="text-slate-500 hover:text-rose-600 font-semibold px-2 py-1 rounded hover:bg-white transition cursor-pointer">
+              Clear
+            </button>
+          </div>
         </div>
 
         <!-- Textarea Body -->
@@ -2253,6 +2261,28 @@ Container(id="my-app", x=0, y=0) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       }
 
+      static isReactJsx(code) {
+        if (!code) return false;
+        const trimmed = code.trim();
+        return /^\s*(?:import\s+|export\s+|function\s+[A-Za-z0-9_]+\s*\(|const\s+\[[A-Za-z0-9_]+,\s*set[A-Za-z0-9_]+\])/m.test(trimmed) ||
+               (/<[a-zA-Z0-9]+[^>]*>/.test(trimmed) && (trimmed.includes('return') || trimmed.includes('useState') || trimmed.includes('onClick')));
+      }
+
+      static cleanSmartQuotes(source) {
+        return (source || '')
+          .replace(/[\u201C\u201D]/g, '"')
+          .replace(/[\u2018\u2019]/g, "'");
+      }
+
+      static cleanMarkdownFences(source) {
+        if (!source) return '';
+        let cleaned = source.trim();
+        if (cleaned.startsWith('```')) {
+          cleaned = cleaned.replace(/^```[a-zA-Z0-9_]*\r?\n?/, '').replace(/\r?\n?```$/, '').trim();
+        }
+        return cleaned;
+      }
+
       static getElementArgsRange(source, elemId) {
         const idRegex = new RegExp('id\\s*=\\s*"' + A11yAutoRepair.escapeRegExp(elemId) + '"');
         const m = idRegex.exec(source);
@@ -2296,7 +2326,7 @@ Container(id="my-app", x=0, y=0) {
         if (!range) return source;
 
         let args = source.substring(range.openParen + 1, range.closeParen);
-        const attrRegex = new RegExp('\\b' + attrName + '\\s*=\\s*("[^"]*"|\\d+|true|false)');
+        const attrRegex = new RegExp('\\b' + attrName + '\\s*=\\s*("[^"]*"|\'[^\']*\'|[a-zA-Z0-9_\\-\\.]+)');
 
         const formattedVal = isString ? `"${attrValue}"` : attrValue;
         if (attrRegex.test(args)) {
@@ -2313,134 +2343,210 @@ Container(id="my-app", x=0, y=0) {
         return source.substring(0, range.openParen + 1) + args + source.substring(range.closeParen);
       }
 
+      static cleanLabelFromId(id) {
+        if (!id) return "Action Control";
+        
+        // Comprehensive dictionary for standard UI components
+        const dict = {
+          'prev': 'Previous', 'back': 'Back',
+          'next': 'Next', 'fwd': 'Forward',
+          'sub': 'Submit', 'submit': 'Submit',
+          'del': 'Delete', 'rm': 'Remove',
+          'srch': 'Search', 'find': 'Search',
+          'pwd': 'Password', 'passwd': 'Password',
+          'auth': 'Sign In', 'login': 'Log In', 'signin': 'Sign In',
+          'logout': 'Sign Out', 'signout': 'Sign Out',
+          'nav': 'Navigation Menu', 'menu': 'Menu',
+          'cart': 'Shopping Cart', 'checkout': 'Proceed to Checkout',
+          'edit': 'Edit Details', 'save': 'Save Changes',
+          'cancel': 'Cancel', 'close': 'Close Dialog', 'dismiss': 'Dismiss',
+          'opt': 'Settings', 'cfg': 'Configure', 'config': 'Settings', 'settings': 'Settings',
+          'notif': 'Notifications', 'alerts': 'Alerts', 'msg': 'Message',
+          'help': 'Help & Support', 'info': 'Information',
+          'add': 'Add New', 'create': 'Create', 'new': 'New Item',
+          'apply': 'Apply', 'ok': 'OK', 'done': 'Done', 'open': 'Open Dialog'
+        };
+
+        // Separate camelCase: myButtonName -> my Button Name
+        let formatted = id.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]+/g, ' ');
+        const words = formatted.trim().split(/\s+/);
+        const filteredWords = [];
+        for (const w of words) {
+          const lower = w.toLowerCase();
+          if (['btn', 'button', 'input', 'action', 'icon', 'txt', 'text', 'field', 'trigger', 'box', 'link', 'item'].includes(lower)) {
+            continue;
+          }
+          if (dict[lower]) {
+            filteredWords.push(dict[lower]);
+          } else {
+            filteredWords.push(lower.charAt(0).toUpperCase() + lower.slice(1));
+          }
+        }
+
+        if (filteredWords.length === 0) {
+          for (const w of words) {
+            const lower = w.toLowerCase();
+            if (dict[lower]) filteredWords.push(dict[lower]);
+            else filteredWords.push(lower.charAt(0).toUpperCase() + lower.slice(1));
+          }
+        }
+
+        return filteredWords.join(' ') || 'Action Control';
+      }
+
       static repair(source) {
         if (!source || !source.trim()) return { code: source, logs: [], success: true };
-        let repaired = source;
+        let repaired = A11yAutoRepair.cleanSmartQuotes(source);
+        repaired = A11yAutoRepair.cleanMarkdownFences(repaired);
         const changeLogs = [];
 
-        // Step 0: Syntax Healing (semicolons, braces)
+        // Pass 0: Detect Accidental Raw React JSX pasted into DSL editor
+        if (A11yAutoRepair.isReactJsx(repaired)) {
+          try {
+            repaired = transpileJsxToDsl(repaired);
+            changeLogs.push("Detected React JSX component: automatically transpiled to A11yCC DSL state hypercube.");
+          } catch(e) {
+            // continue with DSL repair
+          }
+        }
+
+        // Pass 1: Syntax Healing & Structural Normalization
+        if (!/\bContainer\s*\(/i.test(repaired) && /\b(?:Button|Input|Text|Group)\s*\(/i.test(repaired)) {
+          repaired = `Container(id="auto-root", x=0, y=0) {\n${repaired}\n}`;
+          changeLogs.push("Wrapped top-level elements in root Container(id=\"auto-root\").");
+        }
+
         const openBraces = (repaired.match(/\{/g) || []).length;
         const closeBraces = (repaired.match(/\}/g) || []).length;
         if (openBraces > closeBraces) {
           repaired += '\n' + '}'.repeat(openBraces - closeBraces);
-          changeLogs.push(`Closed ${openBraces - closeBraces} unclosed braces.`);
+          changeLogs.push(`Closed ${openBraces - closeBraces} unclosed brace(s).`);
         }
 
-        let ast = null;
-        try {
-          ast = A11yCompiler.parse(repaired);
-        } catch (e) {
-          const fixedLines = repaired.split('\n').map(line => {
-            const trimmed = line.trim();
-            if ((trimmed.startsWith('Button(') || trimmed.startsWith('Input(') || trimmed.startsWith('Text(') || trimmed.startsWith('toggle ')) && trimmed.endsWith(')') && !trimmed.endsWith(');')) {
-              return line + ';';
-            }
-            return line;
-          });
+        const fixedLines = repaired.split('\n').map(line => {
+          const trimmed = line.trim();
+          if ((trimmed.startsWith('Button(') || trimmed.startsWith('Input(') || trimmed.startsWith('Text(') || trimmed.startsWith('toggle ')) && trimmed.endsWith(')') && !trimmed.endsWith(');')) {
+            return line + ';';
+          }
+          return line;
+        });
+        if (fixedLines.join('\n') !== repaired) {
           repaired = fixedLines.join('\n');
+          changeLogs.push("Added missing semicolons to element declarations.");
+        }
+
+        // Pass 2: Extract & declare missing toggles from show_when expressions
+        const showWhenVars = [...repaired.matchAll(/show_when\s*=\s*([^,\)\n]+)/g)];
+        const declaredToggles = new Set();
+        for (const tm of repaired.matchAll(/toggle\s+([a-zA-Z0-9_]+)/g)) {
+          declaredToggles.add(tm[1]);
+        }
+
+        const missingToggles = new Set();
+        for (const sw of showWhenVars) {
+          const exprStr = sw[1];
+          const idMatches = exprStr.matchAll(/([a-zA-Z_][a-zA-Z0-9_]*)/g);
+          for (const im of idMatches) {
+            const vName = im[1];
+            if (vName !== 'true' && vName !== 'false' && !declaredToggles.has(vName)) {
+              missingToggles.add(vName);
+            }
+          }
+        }
+
+        if (missingToggles.size > 0) {
+          let toggleDecls = '';
+          for (const tv of missingToggles) {
+            toggleDecls += `toggle ${tv} = false;\n`;
+            declaredToggles.add(tv);
+            changeLogs.push(`Declared missing toggle: 'toggle ${tv} = false;'`);
+          }
+          repaired = toggleDecls + repaired;
+        }
+
+        // Multi-pass convergence loop (up to 3 iterations for multi-defect resolution)
+        for (let iteration = 0; iteration < 3; iteration++) {
+          let ast = null;
           try {
             ast = A11yCompiler.parse(repaired);
-            changeLogs.push('Added missing semicolons to element declarations.');
-          } catch (e2) {
-            return { code: repaired, logs: changeLogs, success: false, error: e2.message };
+          } catch (e) {
+            return { code: repaired, logs: changeLogs, success: false, error: e.message };
           }
-        }
 
-        let result = A11yCompiler.analyze(ast);
-        if (result.violations.length === 0) {
-          return { code: repaired, logs: ['Code is already 100% compliant.'], success: true };
-        }
-
-        // 1. Fix Undeclared Toggles
-        const undeclared = result.violations.filter(v => v.rule === 'UndeclaredToggle');
-        const addedToggles = new Set();
-        for (const v of undeclared) {
-          const match = v.message.match(/'([^']+)'/);
-          const varName = match ? match[1] : null;
-          if (varName && !addedToggles.has(varName)) {
-            addedToggles.add(varName);
-            repaired = `toggle ${varName} = false;\n` + repaired;
-            changeLogs.push(`Declared missing toggle '${varName}'`);
+          let analysis = A11yCompiler.analyze(ast);
+          if (analysis.violations.length === 0) {
+            return {
+              code: repaired,
+              logs: changeLogs.length > 0 ? changeLogs : ['Code satisfies all accessibility rules.'],
+              success: true
+            };
           }
-        }
 
-        if (addedToggles.size > 0) {
-          try { ast = A11yCompiler.parse(repaired); } catch(e) {}
-        }
+          let { allElements, elementMap } = analysis;
+          let changedInIteration = false;
 
-        let analysis = A11yCompiler.analyze(ast);
-        let { allElements, elementMap } = analysis;
-
-        // 2. Fix Missing Labels (WCAG 4.1.2)
-        const missingLabels = analysis.violations.filter(v => v.rule === 'MissingLabel');
-        for (const v of missingLabels) {
-          const elemId = v.element_id;
-          if (!elemId) continue;
-          let readable = elemId
-            .replace(/[-_]/g, ' ')
-            .replace(/\b(btn|button|input|action|icon|txt|trigger)\b/gi, '')
-            .trim();
-          if (!readable) readable = 'Action';
-          readable = readable.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-
-          repaired = A11yAutoRepair.updateElementAttribute(repaired, elemId, 'label', readable, true);
-          changeLogs.push(`Added label="${readable}" for #${elemId}`);
-        }
-
-        // Refresh AST before checking focus order
-        try {
-          ast = A11yCompiler.parse(repaired);
-          analysis = A11yCompiler.analyze(ast);
-          allElements = analysis.allElements;
-          elementMap = analysis.elementMap;
-        } catch(e) {}
-
-        // 3. Fix Focus Order Mismatch (WCAG 2.4.3 / Topological Sort)
-        const interactiveElems = allElements.filter(e => e.isInteractive);
-        if (interactiveElems.length > 1) {
-          const sortedVisual = [...interactiveElems].sort((a, b) => {
-            if (a.y !== b.y) return a.y - b.y;
-            if (a.x !== b.x) return a.x - b.x;
-            return a.id.localeCompare(b.id);
-          });
-
-          for (let i = 0; i < sortedVisual.length; i++) {
-            const elem = sortedVisual[i];
-            const targetTabIndex = i + 1;
-            repaired = A11yAutoRepair.updateElementAttribute(repaired, elem.id, 'tabindex', targetTabIndex, false);
+          // Pass 3: Fix Missing Labels (WCAG 4.1.2)
+          const missingLabels = analysis.violations.filter(v => v.rule === 'MissingLabel');
+          for (const v of missingLabels) {
+            const elemId = v.element_id;
+            if (!elemId) continue;
+            const cleanLabel = A11yAutoRepair.cleanLabelFromId(elemId);
+            repaired = A11yAutoRepair.updateElementAttribute(repaired, elemId, 'label', cleanLabel, true);
+            changeLogs.push(`Synthesized accessible label for #${elemId}: "${cleanLabel}"`);
+            changedInIteration = true;
           }
-          changeLogs.push('Re-sequenced tabindex order via topological sort');
-        }
 
-        // Refresh AST before checking focus traps
-        try {
-          ast = A11yCompiler.parse(repaired);
-          analysis = A11yCompiler.analyze(ast);
-          allElements = analysis.allElements;
-          elementMap = analysis.elementMap;
-        } catch(e) {}
+          // Pass 4: Fix Focus Order Mismatch (WCAG 2.4.3 / Topological Sort)
+          const hasOrderMismatch = analysis.violations.some(v => v.rule === 'FocusOrderMismatch');
+          if (hasOrderMismatch) {
+            const interactiveElems = allElements.filter(e => e.isInteractive);
+            if (interactiveElems.length > 1) {
+              const sortedVisual = [...interactiveElems].sort((a, b) => {
+                if (a.y !== b.y) return a.y - b.y;
+                if (a.x !== b.x) return a.x - b.x;
+                return a.id.localeCompare(b.id);
+              });
 
-        // 4. Fix Focus Traps (WCAG 2.1.2 & 2.4.3)
-        const focusTraps = analysis.violations.filter(v => v.rule === 'PotentialFocusTrap' || v.rule === 'InvalidFocusFallback');
-        if (focusTraps.length > 0) {
-          let fallbackTarget = allElements.find(e => e.isInteractive && !e.show_when && (!e.parentId || !elementMap.get(e.parentId).show_when));
-          if (!fallbackTarget) fallbackTarget = allElements.find(e => e.isInteractive);
-          if (!fallbackTarget && allElements.length > 0) fallbackTarget = allElements[0];
-
-          if (fallbackTarget) {
-            const processed = new Set();
-            for (const trap of focusTraps) {
-              const elemId = trap.element_id;
-              if (processed.has(elemId)) continue;
-              processed.add(elemId);
-
-              repaired = A11yAutoRepair.updateElementAttribute(repaired, elemId, 'focus_fallback', fallbackTarget.id, true);
-              changeLogs.push(`Set focus_fallback="${fallbackTarget.id}" on #${elemId}`);
+              let changedCount = 0;
+              for (let i = 0; i < sortedVisual.length; i++) {
+                const elem = sortedVisual[i];
+                const targetTabIndex = i + 1;
+                if (elem.tabindex !== targetTabIndex) {
+                  repaired = A11yAutoRepair.updateElementAttribute(repaired, elem.id, 'tabindex', targetTabIndex, false);
+                  changedCount++;
+                  changedInIteration = true;
+                }
+              }
+              if (changedCount > 0) {
+                changeLogs.push(`Re-sequenced tabindex order (1..${sortedVisual.length}) to match visual (y, x) reading order.`);
+              }
             }
           }
+
+          // Pass 5: Fix Focus Traps (WCAG 2.1.2 & 2.4.3)
+          const focusTraps = analysis.violations.filter(v => v.rule === 'PotentialFocusTrap' || v.rule === 'InvalidFocusFallback');
+          if (focusTraps.length > 0) {
+            let fallbackTarget = allElements.find(e => e.isInteractive && !e.show_when && (!e.parentId || !elementMap.get(e.parentId).show_when));
+            if (!fallbackTarget) fallbackTarget = allElements.find(e => e.isInteractive);
+            if (!fallbackTarget && allElements.length > 0) fallbackTarget = allElements[0];
+
+            if (fallbackTarget) {
+              const processed = new Set();
+              for (const trap of focusTraps) {
+                const elemId = trap.element_id;
+                if (processed.has(elemId)) continue;
+                processed.add(elemId);
+
+                repaired = A11yAutoRepair.updateElementAttribute(repaired, elemId, 'focus_fallback', fallbackTarget.id, true);
+                changeLogs.push(`Injected verified focus_fallback="${fallbackTarget.id}" on #${elemId}`);
+                changedInIteration = true;
+              }
+            }
+          }
+
+          if (!changedInIteration) break;
         }
 
-        // Final verification
         try {
           const finalAst = A11yCompiler.parse(repaired);
           const finalRes = A11yCompiler.analyze(finalAst);
@@ -2513,6 +2619,9 @@ Container(id="my-app", x=0, y=0) {
         const res = A11yAutoRepair.repair(originalCode);
 
         if (res.success || (res.code && res.code !== originalCode)) {
+          // Save pre-repair code for 1-click Undo!
+          window._lastPreRepairCode = originalCode;
+
           editor.value = res.code;
           updateLineCount();
 
@@ -2532,6 +2641,16 @@ Container(id="my-app", x=0, y=0) {
       }, 150);
     }
 
+    function undoAutoRepair() {
+      if (!window._lastPreRepairCode) return;
+      const editor = document.getElementById('dslCustomEditor');
+      if (!editor) return;
+      editor.value = window._lastPreRepairCode;
+      window._lastPreRepairCode = null;
+      updateLineCount();
+      compileCustomEditorCode();
+    }
+
     function compileCustomEditorCode() {
       const editor = document.getElementById('dslCustomEditor');
       const consoleOut = document.getElementById('compilerConsoleOut');
@@ -2547,7 +2666,28 @@ Container(id="my-app", x=0, y=0) {
 
       setTimeout(() => {
         btn.innerHTML = originalBtnText;
-        const code = editor.value;
+        let code = editor.value;
+
+        // Transparent React JSX Auto-Detection
+        if (A11yAutoRepair.isReactJsx(code)) {
+          try {
+            const cleanedJsx = A11yAutoRepair.cleanMarkdownFences(code);
+            const transpiled = transpileJsxToDsl(cleanedJsx);
+            if (transpiled && transpiled.trim() && transpiled !== code) {
+              window._lastPreRepairCode = code;
+              editor.value = transpiled;
+              code = transpiled;
+              updateLineCount();
+              window._lastRepairLogs = [
+                "⚛️ React JSX Detected: Automatically transpiled component into A11yCC DSL state hypercube and verified!"
+              ];
+              const fileName = document.getElementById('editorFileName');
+              if (fileName) fileName.innerText = "transpiled_component.dsl";
+            }
+          } catch (transpileErr) {
+            console.warn("Auto-transpilation failed, continuing with compiler:", transpileErr);
+          }
+        }
 
         try {
           const ast = A11yCompiler.parse(code);
@@ -2628,12 +2768,19 @@ Container(id="my-app", x=0, y=0) {
             customFocusedId = null;
 
             const repairSuccessHtml = (window._lastRepairLogs && window._lastRepairLogs.length > 0) ? `
-              <div class="p-3 bg-amber-500/20 border border-amber-400/50 rounded-xl text-amber-200 text-xs flex items-center gap-2.5">
-                <span class="text-base">✨</span>
-                <div>
-                  <span class="font-bold text-white">Auto-Repair Successfully Applied:</span>
-                  <span class="ml-1">${window._lastRepairLogs.join(' • ')}</span>
+              <div class="p-3 bg-amber-500/20 border border-amber-400/50 rounded-xl text-amber-200 text-xs flex items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-base">✨</span>
+                  <div>
+                    <span class="font-bold text-white">Auto-Repair Successfully Applied:</span>
+                    <span class="ml-1">${window._lastRepairLogs.join(' • ')}</span>
+                  </div>
                 </div>
+                ${window._lastPreRepairCode ? `
+                  <button onclick="undoAutoRepair()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold rounded border border-slate-600 transition shrink-0 cursor-pointer active:scale-95">
+                    ↩️ Undo Repair
+                  </button>
+                ` : ''}
               </div>
             ` : '';
             window._lastRepairLogs = null;
@@ -2695,6 +2842,15 @@ Container(id="my-app", x=0, y=0) {
           statusPill.className = 'font-mono-code text-[11px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold border border-rose-200';
           statusPill.innerText = '❌ Parse Error';
 
+          const isJsxHint = A11yAutoRepair.isReactJsx(editor.value) ? `
+            <div class="p-2.5 bg-indigo-500/20 border border-indigo-400/40 rounded-lg text-indigo-200 text-xs flex items-center justify-between gap-2 mt-2">
+              <div><span>⚛️</span> <span class="font-semibold text-white">React Component Detected:</span> Click Transpile & Repair to convert into valid DSL.</div>
+              <button onclick="autoRepairEditorCode()" class="px-2.5 py-1 bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded text-[11px] transition shrink-0 cursor-pointer">
+                ⚡ Transpile & Repair
+              </button>
+            </div>
+          ` : '';
+
           consoleOut.innerHTML = `
             <div class="p-3.5 bg-rose-950 border border-rose-800 rounded-xl space-y-2">
               <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
@@ -2704,10 +2860,11 @@ Container(id="my-app", x=0, y=0) {
                 <span class="text-[10px] bg-rose-900 px-2 py-0.5 rounded text-rose-300 font-mono-code">Line ${err.line || 1}:${err.col || 1}</span>
               </div>
               <p class="text-xs text-rose-300">${err.message || String(err)}</p>
+              ${isJsxHint}
               <div class="p-2.5 bg-amber-500/10 border border-amber-500/40 rounded-lg text-amber-200 text-xs flex items-center justify-between gap-2">
                 <div><span>💡</span> <span class="font-semibold text-white">Syntax Auto-Fix:</span> Attempt automatic semicolon and delimiter healing.</div>
                 <button onclick="autoRepairEditorCode()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded text-[11px] transition shrink-0 cursor-pointer">
-                  ⚡ Auto-Fix
+                  ⚡ Auto-Fix Code
                 </button>
               </div>
             </div>
@@ -3745,10 +3902,13 @@ Container(id="my-app", x=0, y=0) {
       if (m) {
         m.classList.remove('hidden');
         const area = document.getElementById('jsxInputArea');
-        if (area && !area.value.trim()) {
-          loadSampleJsx('clean_modal');
+        if (area) {
+          // Keep empty by default so user can paste immediately without interference
+          area.value = '';
+          setTimeout(() => area.focus(), 50);
         }
-        setTimeout(() => { if (area) area.focus(); }, 50);
+        const err = document.getElementById('jsxTranspileError');
+        if (err) err.classList.add('hidden');
       }
     }
 
@@ -3759,11 +3919,56 @@ Container(id="my-app", x=0, y=0) {
       if (err) err.classList.add('hidden');
     }
 
+    async function pasteFromClipboardToJsx() {
+      const area = document.getElementById('jsxInputArea');
+      if (!area) return;
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            let cleaned = text.trim();
+            if (cleaned.startsWith('```')) {
+              cleaned = cleaned.replace(/^```[a-zA-Z0-9_]*\r?\n?/, '').replace(/\r?\n?```$/, '').trim();
+            }
+            area.value = cleaned;
+            area.focus();
+            const err = document.getElementById('jsxTranspileError');
+            if (err) err.classList.add('hidden');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Clipboard read error:', err);
+      }
+      area.focus();
+    }
+
     function loadSampleJsx(sampleType) {
       const area = document.getElementById('jsxInputArea');
       if (!area) return;
 
-      if (sampleType === 'clean_modal') {
+      if (sampleType === 'quick_alert') {
+        area.value = `export function QuickAlert() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <button id="open-btn" onClick={() => setIsOpen(true)}>
+        Open Alert
+      </button>
+
+      {isOpen && (
+        <div id="alert-modal" role="dialog" aria-modal="true" data-focus-fallback="open-btn">
+          <p id="alert-msg">Review 3 Final Project Complete!</p>
+          <button id="close-btn" onClick={() => setIsOpen(false)} data-focus-fallback="open-btn">
+            Dismiss Alert
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}`;
+      } else if (sampleType === 'clean_modal') {
         area.value = `export function AccessibleModal() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -3837,6 +4042,8 @@ Container(id="my-app", x=0, y=0) {
 }`;
       }
       area.focus();
+      const err = document.getElementById('jsxTranspileError');
+      if (err) err.classList.add('hidden');
     }
 
     function applyReactJsxTranspile() {
@@ -3851,9 +4058,14 @@ Container(id="my-app", x=0, y=0) {
       }
 
       try {
-        const transpiled = transpileJsxToDsl(area.value);
+        let code = area.value.trim();
+        if (code.startsWith('```')) {
+          code = code.replace(/^```[a-zA-Z0-9_]*\r?\n?/, '').replace(/\r?\n?```$/, '').trim();
+        }
+        const transpiled = transpileJsxToDsl(code);
         const editor = document.getElementById('dslCustomEditor');
         if (editor) {
+          window._lastPreRepairCode = editor.value;
           editor.value = transpiled;
           document.getElementById('editorFileName').innerText = "imported_component.dsl";
           updateLineCount();
@@ -3863,7 +4075,7 @@ Container(id="my-app", x=0, y=0) {
         speakScreenReader("React JSX component successfully transpiled and verified.");
       } catch (e) {
         if (errBox) {
-          errBox.textContent = "Transpilation Error: " + e.message;
+          errBox.textContent = "Transpilation Error: " + (e.message || String(e));
           errBox.classList.remove('hidden');
         }
       }
@@ -3901,7 +4113,7 @@ Container(id="my-app", x=0, y=0) {
       speakScreenReader(`${label || elemId}, button, focused.`);
     }
 
-    // Keyboard shortcut: Ctrl+Enter in DSL editor triggers compile
+    // Keyboard shortcut & paste listeners
     document.addEventListener('DOMContentLoaded', () => {
       const editor = document.getElementById('dslCustomEditor');
       if (editor) {
@@ -3910,6 +4122,19 @@ Container(id="my-app", x=0, y=0) {
             e.preventDefault();
             compileCustomEditorCode();
           }
+        });
+
+        // Detect React JSX paste directly into DSL editor
+        editor.addEventListener('paste', () => {
+          setTimeout(() => {
+            const val = editor.value;
+            if (A11yAutoRepair.isReactJsx(val)) {
+              const bannerRepair = document.getElementById('compilerRepairBanner');
+              if (bannerRepair) {
+                bannerRepair.classList.remove('hidden');
+              }
+            }
+          }, 60);
         });
       }
     });
