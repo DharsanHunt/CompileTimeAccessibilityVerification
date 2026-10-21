@@ -224,40 +224,36 @@ def build_final_report():
         "k-dimensional hypercube Q_k = (V, E) across k declared boolean state toggles."
     )
 
-    # Embedded Architecture Diagram Figure
+    # Embedded Architecture Flowchart Diagram Figure
     add_figure_with_caption(
         doc,
         "presentation_screenshots/a11ycc_architecture_diagram.png",
-        "Figure 1: Complete A11yCC End-to-End System Architecture Diagram (Team 9: Dharsan.R.U & Akshat J F). "
-        "Illustrating the 8 core operational stages: Input Ingestion, Compiler Frontend, State Hypercube Q_k Formulation, "
-        "Dual Verification Engine (BFS & ROBDD), 4 Accessibility Invariants Prover, 5-Pass Convergent Auto-Repair, "
-        "WAI-ARIA 1.2 Codegen, and the Production Interactive Studio IDE with Web Speech Audio Simulation.",
+        "Figure 1: Complete A11yCC End-to-End System Architecture Flowchart Diagram (Team No: 9: Dharsan.R.U & Akshat J F). "
+        "Illustrating the complete flowchart topology: Start/End terminal nodes, sequential processing blocks (Lexing, AST Construction, Hypercube Model), "
+        "Decision Diamond 1 (Adaptive Solver Routing: BFS vs. Symbolic ROBDD), Decision Diamond 2 (Multi-Invariant Prover: Invariants 1–4), "
+        "Closed-Loop 5-Pass Auto-Repair Synthesis feedback cycle, and Production WAI-ARIA 1.2 Codegen / Web Studio IDE deployment.",
         width_inches=6.4
     )
 
     p_arch = doc.add_paragraph()
     p_arch.add_run(
-        "As depicted in Figure 1, the A11yCC architecture comprises eight tightly integrated operational stages:\n"
-        "1. Input Ingestion: Accepts both native Declarative UI DSL specifications (.dsl) and raw React JSX/TSX component code. "
-        "The React transpiler automatically extracts useState boolean hooks, conditional short-circuits ({isOpen && <Modal />}), "
-        "and arrow-function event handlers.\n"
-        "2. Compiler Frontend: A regex-driven lexical scanner and recursive-descent parser tokenize source characters into a concrete "
-        "syntax tree (CST) and build a strongly typed Abstract Syntax Tree (AST) annotated with 2D spatial coordinates (x, y) and declared tabindex.\n"
-        "3. State Hypercube Q_k Formulation: Synthesizes a discrete configuration space where each state s is a valuation s: T -> {0, 1}^k, "
-        "yielding |V| = 2^k state vertices and |E| = k * 2^(k-1) directed Hamming-1 transition edges. The Active DOM projection DOM(s) evaluates "
-        "which interactive controls are mounted in each state.\n"
-        "4. Dual Verification Engine: Implements adaptive solver routing. Small components (k <= 6, 64 states) are verified via explicit "
-        "breadth-first search (BFS). Larger components (k >= 7 to 16, 65,536+ states) escalate to a pure-Python, zero-dependency Reduced Ordered "
-        "Binary Decision Diagram (ROBDD) symbolic model checker with memoized If-Then-Else (ITE) operations.\n"
-        "5. Core Accessibility Invariant Prover: Evaluates the state space against 4 formal invariants derived from WCAG 2.1 and WAI-ARIA 1.2 "
-        "(Absence of Lost Focus, Tab Monotonicity, Modal Confinement, and Pushdown Focus Restoration). If violated, an exact counterexample state transition is extracted in O(1) time.\n"
-        "6. 5-Pass Convergent Auto-Repair Engine: Synthesizes algorithmic patches: Pass 0 (syntax sanitization), Pass 1 (bracket/wrapper healing), "
-        "Pass 2 (missing state injection), Pass 3 (semantic label synthesis from 60+ word dictionary), Pass 4 (topological tab-order sorting), "
-        "and Pass 5 (persistent fallback anchor binding) with 1-click atomic Undo.\n"
-        "7. WAI-ARIA 1.2 Code Generation & Diff: Emits production HTML5 markup with automated tab-trapping scripts, pushdown LIFO focus managers, "
-        "inert backdrop masking, and a color-coded git unified diff (+ additions, - deletions).\n"
-        "8. Interactive Verification Studio IDE: A self-contained, single-file browser workbench (index.html) executing client-side JsROBDD "
-        "verification in < 1.5 ms, live DOM rendering, 2^k hypercube inspection, and real-time Web Speech API audio screen reader emulation."
+        "As formalized in the system flowchart of Figure 1, the A11yCC compiler pipeline operates via structured flowchart nodes and decision branches:\n"
+        "1. START Terminal Node (UI Source Ingestion): Ingests native Declarative UI DSL specifications (.dsl) or raw React 18/19 JSX/TSX components. "
+        "The React transpiler extracts useState hooks, short-circuit conditional renders ({isOpen && <Modal />}), and arrow-function handlers.\n"
+        "2. Step 1 (Lexical Scanning & Tokenization): Regex scanner tokenizes raw characters into strongly typed token records, balances braces, "
+        "and maps exact source coordinate spans for high-precision line/column diagnostic reporting.\n"
+        "3. Step 2 (CST Parsing & Typed AST Construction): LALR(1) recursive-descent parser constructs the typed AST hierarchy. The symbol table "
+        "resolves identifiers and scopes, verifies focus fallback references, and computes absolute 2D visual layout coordinates (abs_x, abs_y).\n"
+        "4. Step 3 (State Hypercube Q_k Formulation): Synthesizes the discrete configuration space across k state toggles, generating |V| = 2^k state "
+        "vertices and |E| = k * 2^(k-1) directed Hamming-1 transition edges with active DOM projection DOM(s).\n"
+        "5. Decision Diamond 1 (Adaptive Solver Routing): Branches based on toggle count: if k <= 6, routes to Step 4A (Explicit BFS State Graph); "
+        "if k >= 7 to 16, routes to Step 4B (Pure-Python Bryant ROBDD Symbolic Checker with canonical Shannon DAG and memoized ITE caching).\n"
+        "6. Step 5 (Multi-Invariant Formal Prover): Evaluates WCAG 2.1 & WAI-ARIA 1.2 invariants: Invariant 1 (Absence of Lost Focus / Theorem 1), "
+        "Invariant 2 (Tab Monotonicity vs visual 2D sort), Invariant 3 (Modal Focus Confinement), and Invariant 4 (Pushdown Focus Restoration Stack).\n"
+        "7. Decision Diamond 2 (Invariants Satisfied?): If defects are detected (NO), branches to Step 6 (5-Pass Convergent Auto-Repair Synthesis) "
+        "which executes closed-loop feedback re-verification until 0 defects remain; if certified safe (YES), branches to Step 7.\n"
+        "8. Step 7 & END Terminal Node: Synthesizes production WAI-ARIA 1.2 accessible HTML5 markup, automated tab-trapping scripts, pushdown LIFO focus "
+        "managers, and deploys directly into the live Interactive Web Studio IDE (index.html) with Web Speech API audio screen reader simulation."
     )
 
     doc.add_paragraph().paragraph_format.space_after = Pt(10)
